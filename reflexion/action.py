@@ -105,7 +105,6 @@ class ReactAgent:
 
         ## get next obs
         pmt = scratchpad+'Please generate the observation for question based on the given context.'
-        #logger.info('------pmt-----'+pmt)
         obs = format_step(self.Agent.get_model(pmt)).strip(pmt)
         scratchpad += ' Observation: '+obs
         logger.info('------obs-----'+obs)

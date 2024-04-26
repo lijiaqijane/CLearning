@@ -73,10 +73,7 @@ class Policy(nn.Module):
         # ALGO Logic: Storage setup
         self.obs_length = 200
         self.obs = torch.zeros((self.num_steps, 1)+ (self.obs_length,)).to(self.device) ##+ envs.single_observation_space.shape
-        #logger.info('self.obs.shape: '+str(self.obs.shape))
-        #logger.info('self.ob: '+str(self.obs))
         self.actions = torch.zeros((self.num_steps, 1)).to(self.device)  ##+ envs.single_action_space.shape
-        #logger.info('self.actions.shape: '+ str(self.actions.shape))
         self.logprobs = torch.zeros((self.num_steps,1)).to(self.device)
         self.rewards = torch.zeros((self.num_steps, 1)).to(self.device)
         self.dones = torch.zeros((self.num_steps, 1)).to(self.device)
@@ -90,8 +87,6 @@ class Policy(nn.Module):
         self.scratchpad = q
         self.next_done = torch.zeros(1).to(self.device)
         self.next_obs = self.agent.tokenizer(self.scratchpad, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
-        #logger.info('self.next_obs.shape: '+str(self.next_obs.shape))
-        #logger.info('self.next_obs: '+str(self.next_obs))
         self.policy_optimizer.param_groups[0]["lr"] = frac * self.policy_learning_rate
         self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
             
@@ -104,15 +99,10 @@ class Policy(nn.Module):
 
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                #logger.info(next_obs_str)
                 action, logprob, _, value = self.agent.get_action_and_value([next_obs_str],self.action_list)
                 self.values[step] = value.flatten()
             self.actions[step] = action
             self.logprobs[step] = logprob
-            
-            # logger.info(self.actions.shape)
-            # logger.info(value)
-            # logger.info(logprob)
 
             action_str = self.action_list[action.item()]
             scratchpad, next_obs, reward, done = reagent.step(action_str, self.scratchpad)
@@ -126,7 +116,6 @@ class Policy(nn.Module):
 
         # bootstrap value if not done
         with torch.no_grad():
-            #logger.info(next_obs_str)
             next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
             next_value = self.agent.get_value([next_obs_str]).reshape(1, -1)  
             advantages = torch.zeros_like(self.rewards).to(self.device)
@@ -142,10 +131,7 @@ class Policy(nn.Module):
                 discount = torch.pow(self.gamma, self.steps[t])
                 delta = self.rewards[t] + discount * nextvalues * nextnonterminal - self.values[t]
                 advantages[t] = lastgaelam = delta 
-                # logger.info(discount * nextvalues * nextnonterminal)
-                # logger.info('nextvalues: '+str(nextvalues))
-                # logger.info(nextnonterminal)
-                # logger.info(delta)
+
             returns = advantages +self.values
 
         # flatten the batch
@@ -175,14 +161,7 @@ class Policy(nn.Module):
             for start in range(0, self.batch_size, self.value_minibatch_size):
                 end = start + self.value_minibatch_size
                 mb_inds = b_inds[start:end][0]   ##extract str of index from array([index])
-
-                # logger.info(self.obs)
-                # logger.info(self.obs.reshape((-1,)).shape)
-                # logger.info(b_obs.shape)
-                # logger.info(b_inds)
-                # logger.info(mb_inds)
-                # logger.info(b_obs[mb_inds].int())
-
+                
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
                 newvalue = self.agent.get_value([b_obs_str])
 
