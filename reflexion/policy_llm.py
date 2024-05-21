@@ -20,9 +20,9 @@ from torch.distributions.categorical import Categorical
 from langchain_community.llms import HuggingFacePipeline
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root)
-
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
@@ -31,16 +31,16 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     return layer
 
 class LLMAgent(nn.Module):
-    def __init__(self, normalization_mode = 'token', load_path = None, load_8bit = True):
+    def __init__(self, max_token=100, normalization_mode = 'token', load_path = None, load_8bit = True):
         super().__init__()
 
         self.load_8bit = load_8bit
-        self.base_model = '/scratch2/nlp/plm/Llama-2-7b-chat-hf'
+        self.base_model = '/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct'
         self.lora_r  = 8
         self.lora_alpha = 16
         self.lora_dropout = 0
         self.lora_target_modules  = ["q_proj", "v_proj",]
-
+        self.max_token = max_token
         if torch.cuda.is_available():
             self.device = "cuda"
         else:
@@ -109,6 +109,8 @@ class LLMAgent(nn.Module):
                 self.llama,
                 lora_weights,
                 torch_dtype=torch.float16,
+                load_in_8bit=self.load_8bit,
+                device_map="auto"
             )
 
         if torch.__version__ >= "2" and sys.platform != "win32":
@@ -119,31 +121,34 @@ class LLMAgent(nn.Module):
     def _init_critic(self, critic_weights = None):
         critic = Critic(self.actor, self.tokenizer)
         if critic_weights is not None:
-            critic.v_head.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
+            critic.v_head_mlp3.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
         return critic
 
 
-    def get_model(self, prompt):
+    def get_model(self, prompt, k_sent=1):
         pipeline = transformers.pipeline(
             "text-generation",
             model=self.actor,
             tokenizer=self.tokenizer,
             repetition_penalty=1.1,
-            min_new_tokens = 100,
-            max_new_tokens = 200,
-            temperature=0.5,
-            device_map="auto")
+            min_new_tokens = 30,
+            max_new_tokens = self.max_token,
+            temperature=1.5,
+            device_map="cuda")
         # llm = HuggingFacePipeline(pipeline=query_pipeline)
 
         sequences = pipeline(
             prompt,
             do_sample=True,
-            top_k=1,
-            num_return_sequences=1,
+            top_k = 30,
+            #top_p=0.85,
+            num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
             eos_token_id=self.tokenizer.eos_token_id,
         )
-
-        return sequences[0]['generated_text']
+        if k_sent <= 1:
+            return sequences[0]['generated_text'].split(prompt)[1].split('\n')[0]
+        else:
+            return [i['generated_text'].split(prompt)[1].split('\n')[0] for i in sequences ]
     
     def save(self, epoch, exp_path):
         print("save model")
@@ -151,12 +156,14 @@ class LLMAgent(nn.Module):
 
         os.makedirs(exp_path, exist_ok=True)
         # save lora
-        self.actor.save_pretrained(exp_path)
+        #logger.info(list(self.agent.actor.parameters()))
+        #logger.info(list(filter(lambda p: p.requires_grad, self.actor.parameters())))
+        self.actor.save_pretrained(exp_path)  # safe_serialization=False
         # save critic
         torch.save(self.critic.v_head_mlp3.state_dict(), os.path.join(exp_path, "critic.pth"))
 
     def load(self, exp_path):
-        print("load model")
+        print("----------------load model")
         lora_weights = exp_path
         critic_weights = os.path.join(exp_path, "critic.pth")
         self.actor = self._init_actor(lora_weights).to(self.device)
@@ -177,9 +184,6 @@ class LLMAgent(nn.Module):
         prompt = [obs[0]]
         action_list = [actions]
         action_num = len(action_list[0])
-        # print(obs)
-        # print(prompt)
-        # print(action_list)
 
         sequence = []
         for p, ac in zip(prompt, action_list):
@@ -233,6 +237,5 @@ class LLMAgent(nn.Module):
         else:
             return action, probs.log_prob(action), probs.entropy(), None
 
-
-    def obs2text(self, scratchpad):
-        return
+    def format_step(step: str) -> str:
+        return step.strip('\n').strip().replace('\n\n', ' ').replace('\n', ' ').replace('\'', '')

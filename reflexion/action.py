@@ -5,21 +5,14 @@ import tiktoken
 from langchain.prompts import PromptTemplate
 from llm import AnyOpenAILLM, get_similarity_encoder, get_vectordb
 from policy_llm import LLMAgent
-from prompts import reflect_prompt, react_agent_prompt, feedback_agent_prompt, react_reflect_agent_prompt, memupdate_agent_prompt
-from prompts import REFLECTION_HEADER, LAST_TRIAL_HEADER, REFLECTION_AFTER_LAST_TRIAL_HEADER
-from fewshots import WEBTHINK_SIMPLE6, REFLECTIONS, FEEDBACKS, UPDATES
+from prompts import react_agent_prompt, feedback_agent_prompt
+from fewshots import CRAFTER_SAMPLE,  FEEDBACKS
 from sklearn.metrics.pairwise import cosine_similarity
-from langchain.chains.question_answering import load_qa_chain, LLMChain
-import openai
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from langchain_community.llms import OpenAI
 import torch._dynamo
 torch._dynamo.config.suppress_errors = True
-import subprocess
-from time import sleep
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-from langchain import LLMChain
-from openai import AzureOpenAI
 import logging
 logger = logging.getLogger()
 logger.setLevel('INFO')
@@ -27,53 +20,51 @@ formatter = logging.Formatter()
 chlr = logging.StreamHandler() 
 chlr.setFormatter(formatter)
 chlr.setLevel('INFO')  
-fhlr = logging.FileHandler('Error.log')
+fhlr = logging.FileHandler('Log1.log')
 fhlr.setFormatter(formatter)
 logger.addHandler(chlr)
 logger.addHandler(fhlr)
 import sys
-log_print = open('Defalust.log', 'w')
+log_print = open('Error1.log', 'w')
 sys.stdout = log_print
 sys.stderr = log_print
 
 class ReactAgent:
     def __init__(self,
-                 question: str,
-                 key: str,
+                 task,
+                 env,
                  agent_prompt: PromptTemplate = react_agent_prompt,
                  feedback_prompt: PromptTemplate = feedback_agent_prompt,
-                 interact_llm : AnyOpenAILLM = AnyOpenAILLM(
-                                            temperature=0,
-                                            max_tokens=500,
-                                            model_name="gpt-4",
-                                            model_kwargs={"stop": "\n"},
-                                            openai_api_key=os.environ['OPENAI_API_KEY']),     
-                Agent  : LLMAgent = LLMAgent(),
-                sim_encoder = get_similarity_encoder(),
-                retriever = get_vectordb()[0],
-                collection = get_vectordb()[1]
+                 interact_llm : AnyOpenAILLM = AnyOpenAILLM(),     
+                 sim_encoder = get_similarity_encoder(),
+                 retriever = get_vectordb()[0],
+                 collection = get_vectordb()[1]
                  ) -> None:
-        self.question = question
-        self.answer = ''
-        self.key = key
+        self.task = task
         self.agent_prompt = agent_prompt
-        self.react_examples = WEBTHINK_SIMPLE6
+        self.react_examples = CRAFTER_SAMPLE
         self.feedback_examples = FEEDBACKS
         self.interact_llm = interact_llm
         self.feedback_prompt = feedback_prompt
-        self.llm = Agent.actor
-        self.Agent = Agent
+        self.Agent = LLMAgent()
+        self.llm = LLMAgent().actor
         self.retriever = retriever
         self.collection = collection
         self.sim_encoder = sim_encoder
+        self.previous_action = []
+        self.previous_observation = []
+        self.achieve_subgoal = []
+        self.wrap_env = env
 
-     
-    def step(self, action_type, scratchpad) -> None:
         
-        logger.info('------action_type-----'+action_type)
-        action_content = format_action(self.prompt_agent(scratchpad, action_type+': '))
-        logger.info('------action_content-----'+action_content)
-        scratchpad += ' '+action_type +': '+action_content
+    def step(self, action, scratchpad, obs, rewards, action_list=['0.Noop']):
+        
+        self.wrap_env.previous_observation = obs  ##keep previous obs
+
+        logger.info('------action-----'+action)
+        action = action.split(':')
+        action_type, action_content = action[0].strip(' '), action[1].strip(' ')
+        scratchpad += action_type+': '+action_content
 
         # execute action = env.step
         if action_type == 'Search':
@@ -89,98 +80,138 @@ class ReactAgent:
                         context += doc_details['page_content']
                 except Exception as e:
                     logger.info(e)
-                    scratchpad += f'Could not find that page, please try again.'
             argument = '$Retrieved context$: '+context
 
         elif action_type == 'Ask':
-            feedback = self.get_feedback(scratchpad)
+            feedback = self.get_feedback(obs, scratchpad)
             argument = '$Feedback$: '+ feedback
 
         elif action_type == 'Thought':
             argument = ''
+        elif action_type == 'Act':
+            try:
+                executable_actions = self.wrap_env.get_executable_actions
+
+                argument = action_content.split(', ')
+
+                if len(argument) != 3 or not all(
+                        items in executable_actions.items() for items in {int(argument[1]): argument[0]}.items()):
+                    #scratchpad += 'Invalid Act format. Vaild format is <action, number, times>.'
+                    pass
+                else:
+                    action_list = []
+                    for _ in range(int(argument[2])):
+                        action_list.append(argument[1] + '.' + argument[0])
+
+            except Exception as e:
+                #scratchpad += f'Could not execute this action, please try again.'
+                pass
         else:
             argument = 'Invalid Action!!!!'
-        scratchpad += ' '+ argument
-        logger.info('------argument-----'+argument)
+        #scratchpad += ' '+ argument
+        logger.info('------argument-----'+str(argument))
 
-        ## get next obs
-        pmt = scratchpad+'Please generate the observation for question based on the given context.'
-        obs = format_step(self.Agent.get_model(pmt)).strip(pmt)
-        scratchpad += ' Observation: '+obs
-        logger.info('------obs-----'+obs)
+        step_res = self.wrap_env.steps(actions_list=action_list)
+        obs = str(step_res[0])
         
+        if obs != self.wrap_env.previous_observation:
+            scratchpad += ' Observation: '+obs
+            logger.info('------obs-----'+' Observation: '+obs)
 
-        ##get reward & done
-        self.answer = obs
-        signal = self.gpt_correct() 
-        if signal:
-            scratchpad += ' Answer is CORRECT'
-            reward = 1
-            finished = 1
-        else:
-            scratchpad += ' Answer is WRONG'
-            reward = -1
-            finished = 0
-            
-        return scratchpad, obs, reward, finished
+        finished = False
+        if self.if_task_finished() > 0:
+            rewards += self.if_task_finished()  #reward when task finish
+            finished = True
+        logger.info('##########rewards: '+str(rewards))
+        rewards = rewards - 1  #reward at each time step
 
 
-    def prompt_agent(self, scratchpad, action_type) -> str:
-        pmt= self._build_agent_prompt(scratchpad, action_type)
-        oup = format_step(self.Agent.get_model(pmt).split(pmt)[1])
-        return oup
+        achievement = self.wrap_env.achievements
+        for key in achievement.keys():  #??any goal achieved is OK, not equals to the given task
+            if self.wrap_env.achievements[key] != achievement[key]: ##前后ach不同表示有新增ach
+                self.achieve_subgoal.append(key)
+                self.previous_action.append(self.wrap_env.previous_action)
+                self.previous_observation.append(self.wrap_env.previous_observation)
+                rewards += 0.2 #reward when subgoal finish
+                self.wrap_env.previous_action = []
+                self.wrap_env.previous_observation = ''
+                #break  ##如果加break就是检测到第一个新增subgoal就停止,否则检测所有新增
+
+        return scratchpad, obs, rewards, finished, self.achieve_subgoal, self.previous_action, self.previous_observation
+
+    def update_memory(self, subgoals, achieve_subgoal, pre_action, pre_observation):
+        logger.info('--------------------------Mem upd----------------------------')
+        ## 某个task的所有subgoal_sequence
+        mem = 'The subgoal sequence for {} is '.format(self.task)
+        for action in subgoals:
+            mem += '{} {} times, '.format(str(action[0]), action[1])
+        self.collection.add(
+            documents=[mem],
+            metadatas=[{"content": "task-subgoal"}],
+            ids=["id_" + self.task])
+        logger.info('***********mem1:' + mem)
+
+        ## curr_obs + 某个subgoal_sequence
+        if len(pre_action) == len(pre_observation) and len(pre_observation) == len(achieve_subgoal): ##什么情况下可能不等于
+            for i in range(len(pre_action)):
+                ach_subgoal = ''
+                ach_subgoal += 'Based on the observation \'{}\', the sequence of actions to complete \'{}\' is '.format(
+                    pre_observation[i], achieve_subgoal[i])
+                for act in pre_action[i]:
+                    ach_subgoal += '{}, '.format(act)
+
+                self.collection.add(
+                    documents=[ach_subgoal],
+                    metadatas=[{"content": "subgoal-action"}],
+                    ids=["id_" + achieve_subgoal[i] + pre_observation[i]])
+                logger.info('***********mem2:' + ach_subgoal)
+
+    def get_next_action(self, scratchpad, k_sent):
+        action = self.prompt_agent(scratchpad, k_sent)
+        return action
+
+    def if_task_finished(self):  # how to get the progress if task finished
+        return self.wrap_env.done
     
-    def _build_agent_prompt(self, scratchpad, action_type) -> str:
+    def prompt_agent(self, scratchpad, k_sent) -> str:
+        pmt= self._build_agent_prompt(scratchpad)
+        oup = self.Agent.get_model(pmt, k_sent)
+        return oup
+
+    def _build_agent_prompt(self, scratchpad) -> str:
         return self.agent_prompt.format(
-                            examples = self.react_examples,
-                            question = self.question,
-                            scratchpad = scratchpad,
-                            action_type = action_type)
+            examples=self.react_examples,
+            task=self.task,
+            get_observation= scratchpad)
+    
 
-    def gpt_correct(self):
-        Q, A, P = self.question, self.key, self.answer 
-        #script_path = '/scratch/nlp/lijiaqi/curl.sh'
-        args = "Given one question, there is a groundtruth and a predict_answer. Please decide whether they are the same or not in semantic. \
-    Please output True or False only. If there are expressions like 'I don't know' or 'I cant find' or 'The text doesn't provide' or 'it is not provided in the text', \
-    then output 'None'."+"Question: "+Q+'  '+"groudtruth = " + A + '  '+ "predict_answer = "+P
-        args = args.replace('"','^')
-        while True:
-            if '\n' in args:
-                args = args.strip().replace('\n',' ')
-            else:
-                break
-        ENDPOINT = f"https://api.tonggpt.mybigai.ac.cn/proxy/canadaeast"
-        client = AzureOpenAI(
-                    api_key="",
-                    api_version="2024-02-01",
-                    azure_endpoint=ENDPOINT,
-                    )
-
-        response = client.chat.completions.create(
-            model="gpt-35-turbo-0125",
-            messages=[
-                {"role": "user", "content": args}
-            ],
-        )
-        return response.choices[0].message.content
-
-
-    def get_feedback(self, scratchpad) -> str:
-        fdo = format_step(self.interact_llm(self._build_feedback_prompt(scratchpad)))
-        fd = exempt_label(fdo, self.key, self.sim_encoder)
-        logger.info('***********feedback:'+ fd)
+    def get_feedback(self, observation, scratchpad) -> str:
+        fd = format_step(self.interact_llm(self._build_feedback_prompt(observation, scratchpad)))
+        sub = {}
+        for s in self.wrap_env.subgoal:
+            sub[s[0]] = self.wrap_env.achievements[s[0]]
         return fd
 
-    def _build_feedback_prompt(self, scratchpad) -> str:
+    def _build_feedback_prompt(self, observation, scratchpad) -> str:
+        subgoals = ''
+        if type(self.wrap_env.subgoal) is dict:
+            for task in self.wrap_env.subgoal:
+                subgoals += 'Task: {}'.format(task) + '\n'
+                for goal in self.wrap_env.subgoal[task]:
+                    subgoals += 'Subgoal: {}, the number of times Student need to complete: {}, the number of times Student have already completed: {}'.format(
+                        goal[0], str(goal[1]), str(self.wrap_env.achievements[goal[0]]))
+        else:
+            for goal in self.wrap_env.subgoal:
+                subgoals += 'Subgoal: {}, the number of times Student need to complete: {}, the number of times Student have already completed: {}'.format(
+                    goal[0], str(goal[1]), str(self.wrap_env.achievements[goal[0]]))
+
+
         return self.feedback_prompt.format(
-                            examples = self.feedback_examples,
-                            question = self.question,
-                            scratchpad = scratchpad,
-                            groundtruth = self.key)
-
-
-### String Stuff ###
-gpt2_enc = tiktoken.encoding_for_model("text-davinci-003")
+            examples=self.feedback_examples,
+            task=self.task,
+            subgoals=subgoals,
+            scratchpad= scratchpad,
+            observation=observation)
 
 def parse_action(string):
     pattern = r'^(\w+)\[(.+)\]$'
@@ -216,5 +247,4 @@ def exempt_label(answer, key, encoder):
     cand = answer.replace(',','.').split('.')
     new_cad = [ s for s in cand if not embsim_match(s, key, encoder, 0.85)[0]]
     return ','.join(new_cad)
-
 

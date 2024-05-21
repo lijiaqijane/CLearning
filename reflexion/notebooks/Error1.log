@@ -1,0 +1,15 @@
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.79s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.96s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.06s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.41s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.61s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+[INFO:minedojo.tasks] Loaded 1572 Programmatic tasks, 1558 Creative tasks, and 1 special task: "Playthrough". Totally 3131 tasks loaded.
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.75s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.83s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.83s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.29s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.48s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.90s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.03s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.04s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.46s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.66s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Traceback (most recent call last):
+  File "/scratch/nlp/lijiaqi/CLearning/reflexion/notebooks/Ours.py", line 47, in <module>
+    global_step = policy.trainer(task, global_step, frac, writer)
+  File "../ppo_llm_pomdp.py", line 134, in trainer
+    scratchpad, next_obs, reward, done, ach, preact, preobs = reagent.step(action_str, self.scratchpad, next_obs_str, reward)
+  File "../action.py", line 66, in step
+    action_type, action_content = action[0].strip(' '), action[1].strip(' ')
+IndexError: list index out of range

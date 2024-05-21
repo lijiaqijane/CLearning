@@ -15,12 +15,6 @@ class AnyOpenAILLM:
     def __init__(self, *args, **kwargs):
         # Determine model type from the kwargs
         model_name = kwargs.get('model_name', 'gpt-3.5-turbo')
-        if model_name.split('-')[0] == 'text':
-            self.model = OpenAI(*args, **kwargs)
-            self.model_type = 'completion'
-        else:
-            self.model = OpenAI(*args, **kwargs)
-            self.model_type = 'chat'
 
     def __call__(self, prompt: str):
         prompt = str(prompt)
@@ -33,7 +27,7 @@ class AnyOpenAILLM:
         args = [{"role": "user", "content": prompt}]
         ENDPOINT = f"https://api.tonggpt.mybigai.ac.cn/proxy/canadaeast"
         client = AzureOpenAI(
-                    api_key="",
+                    api_key="bf34690d256c8856366f78eb83e9c771",   
                     api_version="2024-02-01",
                     azure_endpoint=ENDPOINT,
                     )
@@ -49,7 +43,7 @@ class AnyOpenAILLM:
 
         return response.choices[0].message.content
 
-def get_model(df_new_token, model="/scratch2/nlp/plm/Llama-2-7b-chat-hf"):  #Llama-2-7b-chat-hf, LLaMA-2-7B-32K
+def get_model(df_new_token, model="/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct"):  #Llama-2-7b-chat-hf, LLaMA-2-7B-32K
     bnb_config = transformers.BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type='nf4',
@@ -79,12 +73,12 @@ def get_model(df_new_token, model="/scratch2/nlp/plm/Llama-2-7b-chat-hf"):  #Lla
     return llm
 
 
-def get_similarity_encoder(encode_model='/scratch/nlp/lijiaqi/RAM_PPO/reflexion/bert-base-nli-mean-tokens'):
+def get_similarity_encoder(encode_model='/scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens'):
     encoder = SentenceTransformer(encode_model)
     return encoder
 
 
-def get_vectordb(re_no=1, df_collection_name="math", df_path="/scratch/nlp/lijiaqi/RAM_PPO/reflexion/chroma_math",df_model_name = "/scratch/nlp/lijiaqi/RAM_PPO/reflexion/all-MiniLM-L6-v2"):
+def get_vectordb(re_no=1, df_collection_name="RAMC", df_path="/scratch/nlp/lijiaqi/models/chroma_RC",df_model_name = "/scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2"):
     embeddings = SentenceTransformerEmbeddings(model_name = df_model_name)
     chroma = chromadb.PersistentClient(path = df_path)
     collection = chroma.get_collection(df_collection_name)

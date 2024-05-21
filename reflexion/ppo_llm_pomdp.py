@@ -4,17 +4,17 @@ import os
 import random
 import time
 from distutils.util import strtobool
-
 import gym
 import numpy as np
 import torch
 import torch.nn as nn
+import gym
+from reflexion.crafter import crafter_env
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
-from torch.utils.tensorboard import SummaryWriter
 from policy_llm import LLMAgent
 from action import ReactAgent, logger
-
+from torch.utils.tensorboard import SummaryWriter
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.orthogonal_(layer.weight, std)
@@ -23,10 +23,10 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
 class Policy(nn.Module):
 
-    def __init__(self):
+    def __init__(self, max_obs):
         super().__init__()
 
-        self.num_steps = 3
+        self.num_steps = 50
         self.gamma = 0.99
         self.gae_lambda = 0.95
         self.policy_num_minibatches = self.num_steps
@@ -35,12 +35,11 @@ class Policy(nn.Module):
         self.batch_size = self.num_steps
         self.policy_minibatch_size = int(self.batch_size // self.policy_num_minibatches)
         self.value_minibatch_size = int(self.batch_size // self.value_num_minibatches)
-        self.total_timesteps = 500000
         self.seed = 1
         self.cuda = True
         self.policy_learning_rate = 5e-7
         self.value_learning_rate = 1e-5
-        self.norm_adv = True
+        self.norm_adv = False
         self.clip_coef = 0.2
         self.clip_vloss = True
         self.ent_coef = 0.01
@@ -48,10 +47,10 @@ class Policy(nn.Module):
         self.max_grad_norm = 0.5
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
-        self.resume =False
-        self.load_path = "saved_models"
-
+        self.resume = False
+        self.load_path = "../../result/epoch_0002"
         self.normalization_mode = "word"
+
         random.seed(self.seed)
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
@@ -67,11 +66,13 @@ class Policy(nn.Module):
         else:
             self.agent = LLMAgent(normalization_mode=self.normalization_mode, load_8bit=True)
         
+        #logger.info(list(self.agent.actor.parameters()))
+        #logger.info(list(filter(lambda p: p.requires_grad, self.agent.actor.parameters())))
         self.policy_optimizer = optim.AdamW(filter(lambda p: p.requires_grad, self.agent.actor.parameters()), lr=self.policy_learning_rate, eps=1e-5, weight_decay=0)
-        self.value_optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.agent.actor.parameters()), lr=self.value_learning_rate, eps=1e-5)
+        self.value_optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.agent.critic.parameters()), lr=self.value_learning_rate, eps=1e-5)
             
         # ALGO Logic: Storage setup
-        self.obs_length = 200
+        self.obs_length = max_obs
         self.obs = torch.zeros((self.num_steps, 1)+ (self.obs_length,)).to(self.device) ##+ envs.single_observation_space.shape
         self.actions = torch.zeros((self.num_steps, 1)).to(self.device)  ##+ envs.single_action_space.shape
         self.logprobs = torch.zeros((self.num_steps,1)).to(self.device)
@@ -79,18 +80,36 @@ class Policy(nn.Module):
         self.dones = torch.zeros((self.num_steps, 1)).to(self.device)
         self.values = torch.zeros((self.num_steps, 1)).to(self.device)
         self.steps = torch.zeros((self.num_steps, 1)).to(self.device)
-        self.action_list = ["Thought","Search","Ask"]
+        #self.action_list = ["Thought","Search","Ask"]
+        self.candidate_action_num = 3
 
-    def trainer(self, q, a, step_cnt, frac, is_warmup = False):
+    def format_action(self, action_list):
+        actions = []
+        for i in action_list:
+            if i =='' or i ==' ' or (('Thought: ' not in i) and ('Ask: ' not in i) and ('Search: ' not in i)):
+                i = 'Thought: '+i
+            actions.append(i)
+        return actions
 
-        reagent = ReactAgent(q, a)
-        self.scratchpad = q
+    def trainer(self, task, step_cnt, frac, writer, is_warmup = False):  ##？？做对提前结束
+        #logger.info('max_obs:'+str(self.obs_length))
+
+        #prepare craft env
+        env = gym.make("smartplay:Crafter-v0")
+        env = crafter_env.WrapEnv(env)
+        env.set_task(task)
+
+        reagent = ReactAgent(task, env)  
+        observation = str(env.steps(['0.Noop'])[0][-1])  
+        self.scratchpad = observation   
+
         self.next_done = torch.zeros(1).to(self.device)
-        self.next_obs = self.agent.tokenizer(self.scratchpad, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
+        self.next_obs = self.agent.tokenizer(observation, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
+
         self.policy_optimizer.param_groups[0]["lr"] = frac * self.policy_learning_rate
         self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
             
-
+        reward = 0
         for step in range(0, self.num_steps):
             step_cnt += 1 
             self.obs[step] = self.next_obs
@@ -99,23 +118,35 @@ class Policy(nn.Module):
 
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                action, logprob, _, value = self.agent.get_action_and_value([next_obs_str],self.action_list)
+                action_list = reagent.get_next_action(self.scratchpad, self.candidate_action_num)
+                
+                logger.info('action_list:'+str(action_list))
+                action, logprob, _, value = self.agent.get_action_and_value([next_obs_str], action_list)
                 self.values[step] = value.flatten()
             self.actions[step] = action
             self.logprobs[step] = logprob
+            
+            # logger.info(self.actions.shape)
+            # logger.info(value)
+            # logger.info(logprob)
 
-            action_str = self.action_list[action.item()]
-            scratchpad, next_obs, reward, done = reagent.step(action_str, self.scratchpad)
-            self.scratchpad += scratchpad
+            action_str = action_list[action.item()]
+            scratchpad, next_obs, reward, done, ach, preact, preobs = reagent.step(action_str, self.scratchpad, next_obs_str, reward)
+            self.scratchpad = scratchpad
+
 
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) ##??
             self.next_obs = self.agent.tokenizer(next_obs, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
-            self.next_obs, next_done = torch.Tensor(self.next_obs).to(self.device), torch.Tensor([False]).to(self.device)
+            self.next_obs, next_done = torch.Tensor(self.next_obs).to(self.device), torch.Tensor([done]).to(self.device)
             self.steps[step] = torch.Tensor(action).to(self.device)  ##?? item['macro_action_steps'] for item in info
 
 
+        # memory update
+        reagent.update_memory(env.subgoal, ach, preact, preobs)
+
         # bootstrap value if not done
         with torch.no_grad():
+
             next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
             next_value = self.agent.get_value([next_obs_str]).reshape(1, -1)  
             advantages = torch.zeros_like(self.rewards).to(self.device)
@@ -130,10 +161,15 @@ class Policy(nn.Module):
 
                 discount = torch.pow(self.gamma, self.steps[t])
                 delta = self.rewards[t] + discount * nextvalues * nextnonterminal - self.values[t]
-                advantages[t] = lastgaelam = delta 
-
+                advantages[t] = delta 
+                # logger.info(discount * nextvalues * nextnonterminal)
+                # logger.info('nextvalues: '+str(nextvalues))
+                # logger.info(nextnonterminal)
+                # logger.info(delta)
             returns = advantages +self.values
 
+        # logger.info('advantages:'+str(advantages))
+        # logger.info('returns:'+str(returns))
         # flatten the batch
         b_obs = self.obs.reshape((-1,) + (self.obs_length,))
         b_logprobs = self.logprobs.reshape(-1)
@@ -141,6 +177,8 @@ class Policy(nn.Module):
         b_advantages = advantages.reshape(-1)
         b_returns = returns.reshape(-1)
         b_values = self.values.reshape(-1)
+        # logger.info('b_advantages:'+str(b_advantages))
+
 
         # Optimizing the policy and value network
         b_inds = np.arange(self.batch_size)
@@ -161,7 +199,14 @@ class Policy(nn.Module):
             for start in range(0, self.batch_size, self.value_minibatch_size):
                 end = start + self.value_minibatch_size
                 mb_inds = b_inds[start:end][0]   ##extract str of index from array([index])
-                
+
+                # logger.info(self.obs)
+                # logger.info(self.obs.reshape((-1,)).shape)
+                # logger.info(b_obs.shape)
+                # logger.info(b_inds)
+                # logger.info(mb_inds)
+                # logger.info(b_obs[mb_inds].int())
+
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
                 newvalue = self.agent.get_value([b_obs_str])
 
@@ -198,10 +243,16 @@ class Policy(nn.Module):
                 end = start + self.policy_minibatch_size
                 mb_inds = b_inds[start:end][0]
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
-                _, newlogprob, entropy, newvalue = self.agent.get_action_and_value([b_obs_str], self.action_list, b_actions.long()[mb_inds], is_warmup, return_value = False)
+                _, newlogprob, entropy, newvalue = self.agent.get_action_and_value([b_obs_str], action_list, b_actions[mb_inds], is_warmup, return_value = False)
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
-                
+                # logger.info('mb_inds:'+str(mb_inds))
+                # logger.info('b_actions:'+str(b_actions))
+                # logger.info('b_logprobs:'+str(b_logprobs))
+                # logger.info('newlogprob:'+str(newlogprob))
+                # logger.info('logratio:'+str(logratio))
+                # logger.info('ratio:'+str(ratio))
+
                 with torch.no_grad():
                     old_approx_kl = (-logratio).mean()
                     approx_kl = ((ratio - 1) - logratio).mean()
@@ -210,9 +261,12 @@ class Policy(nn.Module):
 
 
                 mb_advantages = b_advantages[mb_inds]
+                logger.info('mb_advantages:'+str(mb_advantages))
+
                 if self.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
 
+                logger.info('mb_advantages:'+str(mb_advantages))
                 # Policy loss
                 pg_loss1 = -mb_advantages * ratio
                 pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - self.clip_coef, 1 + self.clip_coef)
@@ -224,6 +278,14 @@ class Policy(nn.Module):
                 
                 loss.backward()
                 
+                # logger.info('policy_loss:'+str(pg_loss.item()))
+                # logger.info('value_loss:'+str(v_loss.item()))
+                # logger.info('mb_advantages:'+str(mb_advantages.item()))
+                # logger.info('pg_loss1:'+str(pg_loss1.item()))
+                # logger.info('pg_loss2:'+str(pg_loss2.item()))
+                # logger.info('old_approx_kl:'+str(old_approx_kl.item()))
+                # logger.info('approx_kl:'+str(approx_kl.item()))
+
                 if policy_update_steps % self.gradient_checkpointing_steps == 0:
                     if self.target_kl is not None:
                         if total_approx_kl > self.target_kl:
@@ -237,13 +299,30 @@ class Policy(nn.Module):
 
             logger.info('Update policy')
 
-        logger.info('Finish epoch')    
+        logger.info('Finish epoch') 
+        y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
+        var_y = np.var(y_true)
+        explained_var = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
+
         if len(clipfracs) == 0:
             num_clipfracs = 0
         else:
             num_clipfracs = np.mean(clipfracs)
 
-        self.agent.save(step_cnt + 1, f"./")
+        writer.add_scalar("charts/policy_learning_rate", self.policy_optimizer.param_groups[0]["lr"], step_cnt)
+        writer.add_scalar("charts/value_learning_rate", self.value_optimizer.param_groups[0]["lr"], step_cnt)
+        writer.add_scalar("losses/value_loss", v_loss.item(), step_cnt)
+        writer.add_scalar("losses/policy_loss", pg_loss.item(), step_cnt)
+        writer.add_scalar("losses/entropy", entropy_loss.item(), step_cnt)
+        writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/approx_kl", approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/total_approx_kl", total_approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/policy_update_times", policy_update_steps // self.gradient_checkpointing_steps, step_cnt)
+        writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
+        writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
+        
+
+        #self.agent.save(step_cnt + 1, f"../../result")
 
         return step_cnt
 
