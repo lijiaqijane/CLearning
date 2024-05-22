@@ -15,7 +15,6 @@ import os
 import torch.nn as nn
 import numpy as np
 import transformers
-import random
 from critic import Critic
 from torch.distributions.categorical import Categorical
 from langchain_community.llms import HuggingFacePipeline
@@ -36,7 +35,7 @@ class LLMAgent(nn.Module):
         super().__init__()
 
         self.load_8bit = load_8bit
-        self.base_model = '/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct' #Meta-Llama-3-8B-Instruct, Llama-2-7b-chat-hf, Llama-2-13b-chat-hf
+        self.base_model = '/scratch2/nlp/plm/Llama-2-13b-chat-hf' #Meta-Llama-3-8B-Instruct
         self.lora_r  = 8
         self.lora_alpha = 16
         self.lora_dropout = 0
@@ -126,6 +125,32 @@ class LLMAgent(nn.Module):
         return critic
 
 
+    # def get_model(self, prompt, k_sent=1):
+    #     pipeline = transformers.pipeline(
+    #         "text-generation",
+    #         model=self.actor,
+    #         tokenizer=self.tokenizer,
+    #         repetition_penalty=1.1,
+    #         min_new_tokens = 30,
+    #         max_new_tokens = self.max_token,
+    #         temperature=1.5,
+    #         device_map="cuda")
+    #     # llm = HuggingFacePipeline(pipeline=query_pipeline)
+
+    #     sequences = pipeline(
+    #         prompt,
+    #         do_sample=True,
+    #         top_k = 30,
+    #         #top_p=0.85,
+    #         num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
+    #         eos_token_id=self.tokenizer.eos_token_id,
+    #     )
+    #     if k_sent <= 1:
+    #         return sequences[0]['generated_text'].split(prompt)[1].split('\n')[0]
+    #     else:
+    #         return [i['generated_text'].split(prompt)[1].split('\n')[0] for i in sequences ]
+
+
     def get_model(self, prompt, k_sent=1):
         pipeline = transformers.pipeline(
             "text-generation",
@@ -134,59 +159,30 @@ class LLMAgent(nn.Module):
             repetition_penalty=1.1,
             min_new_tokens = 30,
             max_new_tokens = self.max_token,
-            temperature=0.5,
+            temperature= 0.9,
             device_map="cuda")
         # llm = HuggingFacePipeline(pipeline=query_pipeline)
 
-        sequences = pipeline(
-            prompt + ' Act: [',
-            do_sample=True,
-            top_k = 1,
-            #top_p=0.85,
-            num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
-            eos_token_id=self.tokenizer.eos_token_id,
-        )
-        if k_sent <= 1:
-            return [sequences[0]['generated_text'].split(prompt)[1].strip('\n').split(']')[0].replace('[','')]
-        else:
-            return [i['generated_text'].split(prompt)[1].split('\n')[0] for i in sequences ]
+        cand = []
+        origin_pmt = prompt
+        for i in  [' Thought:',' Ask:',' Search:',' Act: [']:
+            prompt = origin_pmt + i
+            #print('----------------',prompt)
+            sequences = pipeline(
+                prompt,
+                do_sample=True,
+                top_k = 30,
+                #top_p=0.85,
+                num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
+                eos_token_id=self.tokenizer.eos_token_id,
+            )
+            res = sequences[0]['generated_text'].split(prompt)[1].strip('\n')
+            if i !=' Act: [':
+                cand.append(i+res)
+            else:
+                cand.append(' Act: '+res.split(']')[0])
 
-
-#     def get_model(self, prompt, k_sent=1):
-#         pipeline = transformers.pipeline(
-#             "text-generation",
-#             model=self.actor,
-#             tokenizer=self.tokenizer,
-#             repetition_penalty=1.1,
-#             min_new_tokens = 30,
-#             max_new_tokens = self.max_token,
-#             temperature=0.1,
-#             device_map="cuda")
-#         # llm = HuggingFacePipeline(pipeline=query_pipeline)
-
-#         cand = []
-#         for i in [' Thought: ',' Ask: ',' Search: ',' Act: ']:
-#             if i !=' Act: ':
-#                 prompt += i
-#                 sequences = pipeline(
-#                     prompt,
-#                     do_sample=True,
-#                     top_k = 1,
-#                     #top_p=0.85,
-#                     num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
-#                     eos_token_id=self.tokenizer.eos_token_id,
-#                 )
-#                 cand.append(i+sequences[0]['generated_text'].split(prompt)[1].split('\n')[0])
-#             else:
-#                 act_list = ["0. Noop: Always applicable.","1. Move West: Flat ground west of the agent.","2. Move East: Flat ground east of the agent.",\
-# "3. Move North: Flat ground north of the agent.","4. Move South: Flat ground south of the agent.","5. Do: Facing creature or material; have necessary tool.",\
-# "6. Sleep: Energy level is below maximum.","7. Place Stone: Stone in inventory.","8. Place Table: Wood in inventory.","9. Place Furnace: Stone in inventory.",\
-# "10. Place Plant: Sapling in inventory.","11. Make Wood Pickaxe: Nearby table; wood in inventory.","12. Make Stone Pickaxe: Nearby table; wood, stone in inventory.",\
-# "13. Make Iron Pickaxe: Nearby table, furnace; wood, coal, iron an inventory.","14. Make Wood Sword: Nearby table; wood in inventory.",\
-# "15. Make Stone Sword: Nearby table; wood, stone in inventory.","16. Make Iron Sword: Nearby table, furnace; wood, coal, iron in inventory."]
-#                 no_seed = random.randint(0,len(act_list))
-#                 cand.append(i+ act_list[no_seed].split('.')[1].split(':')[0] +',' + act_list[no_seed].split('.')[0])
-#         return cand
+        return cand
 
     
     def save(self, epoch, exp_path):

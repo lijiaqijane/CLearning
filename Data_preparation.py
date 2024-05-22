@@ -3,8 +3,8 @@ from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddi
 import chromadb
 from langchain_community.vectorstores import Chroma
 
-embeddings = SentenceTransformerEmbeddings(model_name="/scratch/nlp/lijiaqi/RAM_PPO/reflexion/all-MiniLM-L6-v2", model_kwargs={"device": "cuda"})
-chroma = chromadb.PersistentClient(path="/scratch/nlp/lijiaqi/RAM_PPO/reflexion/chroma_RC")
+embeddings = SentenceTransformerEmbeddings(model_name="/scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2", model_kwargs={"device": "cuda"})
+chroma = chromadb.PersistentClient(path="/scratch/nlp/lijiaqi/models/chroma_RC")
 #collection = chroma.delete_collection("math")
 collection = chroma.create_collection("RAMC")
 

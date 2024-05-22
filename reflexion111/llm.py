@@ -43,7 +43,7 @@ class AnyOpenAILLM:
 
         return response.choices[0].message.content
 
-def get_model(df_new_token, model="/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct"):  #Llama-2-7b-chat-hf, LLaMA-2-7B-32K, Meta-Llama-3-8B-Instruct,Llama-2-13b-chat-hf
+def get_model(df_new_token, model="/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct"):  #Llama-2-7b-chat-hf, LLaMA-2-7B-32K, Meta-Llama-3-8B-Instruct, Llama-2-13b-chat-hf
     bnb_config = transformers.BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type='nf4',

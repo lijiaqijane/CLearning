@@ -5,8 +5,6 @@ Use pytorch device: cuda
 Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
 Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
 Use pytorch device: cuda
-HTTP Request: GET https://api.gradio.app/gradio-messaging/en "HTTP/1.1 200 OK"
 ===========collect_wood
 Loaded 1572 Programmatic tasks, 1558 Creative tasks, and 1 special task: "Playthrough". Totally 3131 tasks loaded.
-action_list:[" The player wants the gather some more wood before proceeding. Since you're familiar with the actions available in the game and the required wood pickaxe, use the search function, if you have some idea about where there could be wood or other items. For the purpose of solving the problem you don't have direct access to the full information, only this observation. In any case, your next action. (Output the result like in example).", ' You see flat ground all around you for now and the energy level is full.', ' ']
-------action----- You see flat ground all around you for now and the energy level is full.
+action_list:[' Act: Noop, 0']

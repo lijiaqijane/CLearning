@@ -1,21 +1,38 @@
 from langchain.prompts import PromptTemplate
 
 ##Performing steps based solely on the previous scratchpad (thought/action/observation)
-REACT_INSTRUCTION = REACT_INSTRUCTION = """You’re a player trying to play the game of Crafter. 
-Given the player’s current observation, you can only select one action in the list below:
-Act: [Noop, 0], Act: [Move West, 1], Act: [Move East, 2], Act: [Move North, 3], Act: [Move South, 4],
-Act: [Do, 5], Act: [Sleep, 6], Act: [Place Stone, 7], Act: [Place Table, 8], Act: [Place Furnace, 9],
-Act: [Place Plant, 10], Act: [Make Wood Pickaxe, 11], Act: [ Make Stone Pickaxe, 12], Act: [Make Iron Pickaxe, 13], 
-Act: [Make Wood Sword, 14], Act: [Make Stone Sword, 15], Act: [Make Iron Sword, 16] 
+REACT_INSTRUCTION = """You are currently in the game "Crafter" through textual APIs. In each turn, you must create an API call message based on the textual observation of what you see and your current status. The observation will follow the format:
 
-Here are some examples:
-{examples}
-(END OF EXAMPLES)
+You see "a list of things you can see"
+You face "the thing close to you"
+You have "your inventory"
+You status: "the detailed status of you"
+
+Your output message MUST adhere to the format: "action_type: content"
+
+There are four valid action types, each with specific functions and expected content format:
+
+- Think:Think your plan instead of calling APIs. Output starting with `Think` will not be treated as API calls.
+- Search:Call a retriever to obtain action sequences from a memory knowledgebase for complete goals relevant to the task.
+- Ask: Seek assistance and advice from a friendly and knowledgeable third person, considering that the third person may not be aware of your specific situation.
+- Act: Select a specific instruction from the following list to execute.
+["Noop", "Move West", "Move East", "Move South", "Move North", "Do", "Sleep", "Place Stone", "Place Table", "Place Furnace", "Place Plant", "Make Wood Pickaxe", "Make Stone Pickaxe", "Make Iron Pickaxe", "Make Wood Sword", "Make Stone Sword", "Make Iron Sword"]
+
+It is crucial to adhere to the following rules:
+
+1. All your output will be treated as a message to the game, and any deviation from the format will result in an error.
+2. Only one message is permitted in your output at a time.
+3. Only "Act" will interact with the actual game environment, and the environment only accepts instructions in the provided JSON list.
+4. Instructions are not always applicable; for example, "Do" only works if you are facing something with the correct tools in your inventory.
+5. Your actions will result in rewards or punishments, and your goal is to maximize the total reward.
+
 
 Task: {task}
-The player’s in game observation and previous experience for reference: {get_observation}
+Current observation: {get_observation}
 """
 
+
+#Follow the examples and output in the format: Act/Seatch/Ask : the content of the action
 
 ##Performing steps based on the previous scratchpad (thought/action/observation) and reflections
 REACT_REFLECT_INSTRUCTION ="""You’re a player trying to play the game of Crafter. Solve the decison-making task with interleaving Thought, Action, Observation steps. 
@@ -65,7 +82,7 @@ Task: {task}
 Reflection:"""
 
 react_agent_prompt = PromptTemplate(
-    input_variables=["examples", "task", "get_observation"],
+    input_variables=["task", "get_observation"],
     template=REACT_INSTRUCTION,
 )
 

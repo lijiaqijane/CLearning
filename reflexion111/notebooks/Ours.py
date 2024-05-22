@@ -31,7 +31,7 @@ def get_max_obslen(ds):
 
 #task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond'])
 task = 'collect_wood'
-num_updates = 1   ##??最大步数
+num_updates = 10000   ##??最大步数
  
 # writer = SummaryWriter(f"../writer/test")
 policy = Policy(max_obs = 200)  
