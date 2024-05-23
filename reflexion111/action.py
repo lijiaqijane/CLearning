@@ -57,14 +57,14 @@ class ReactAgent:
         self.wrap_env = env
 
         
-    def step(self, action, scratchpad, obs, rewards, action_list=['0.Noop']):
+    def step(self, action, traj, obs, rewards, hit, scratchpad = '', action_list=['0.Noop']):
         
         self.wrap_env.previous_observation = obs  ##keep previous obs
 
         logger.info('------step-----'+action)
         action = action.split(':')
         action_type, action_content = action[0].strip(' '), action[1].strip(' ')
-        scratchpad += action_type+': '+action_content
+        scratchpad += action_type+': '+action_content+'\n'
 
         # execute action = env.step
         if action_type == 'Search':
@@ -81,56 +81,54 @@ class ReactAgent:
                 except Exception as e:
                     logger.info(e)
             argument = '$Retrieved context$: '+context
-
+            scratchpad += ' '+ argument+'\n'
         elif action_type == 'Ask':
-            feedback = self.get_feedback(obs, scratchpad)
+            feedback = self.get_feedback(obs, '\n'.join(traj)+scratchpad)
             argument = '$Feedback$: '+ feedback
-
+            scratchpad += ' '+ argument+'\n'
         elif action_type == 'Thought':
             argument = ''
         elif action_type == 'Act':
             try:
-                executable_actions = self.wrap_env.get_executable_actions
+                executable_actions = self.wrap_env.get_executable_actions()
 
                 argument = action_content.split(', ')
 
-
-                ## if act: 补全3个参数
-                # if len(argument) != 3 or not all(
-                #         items in executable_actions.items() for items in {int(argument[1]): argument[0]}.items()):
-                #     #scratchpad += 'Invalid Act format. Vaild format is <action, number, times>.'
-                #     pass
-                # else:
-                #     action_list = []
-                #     for _ in range(int(argument[2])):
-                #         action_list.append(argument[1] + '.' + argument[0])
                 ## if act: 补全2个参数
-                if len(argument) != 2 or not all(items in executable_actions.items() for items in {int(argument[1]): argument[0]}.items()):
+                # logger.info('------len(argument)---'+str(len(argument)))
+                # logger.info('------argument[0]---'+str( argument[0] not in list(executable_actions.values()) ))
+                # logger.info('------argument[1]---'+str(int(argument[1]) not in list(executable_actions.keys())))
+                if len(argument) != 2 or argument[0] not in list(executable_actions.values()) or int(argument[1]) not in list(executable_actions.keys()):
+                    scratchpad += 'Invalid Action! '+'\n'
                     pass
                 else:
                     action_list = [argument[1] + '.' + argument[0]] 
+                    #     action_list = []
+                    #     for _ in range(int(argument[2])):
+                    #         action_list.append(argument[1] + '.' + argument[0])
 
             except Exception as e:
-                #scratchpad += f'Could not execute this action, please try again.'
                 pass
         else:
-            argument = 'Invalid Action!!!!'
-        #scratchpad += ' '+ argument
+            scratchpad += 'Invalid Action! '+'\n'
+        
         logger.info('------argument---'+str(argument))
 
-        logger.info('------action-----'+str(argument))
+        logger.info('------action-----'+str(action_list))
         step_res = self.wrap_env.steps(actions_list=action_list)
         obs = str(step_res[0])
         if obs not in self.wrap_env.previous_observation:
-            scratchpad += ' Observation: '+obs
-            logger.info('------obs-----'+' Observation: '+obs)
+            scratchpad += 'Observation: '+obs+'\n'
+        logger.info('------scratchpad-----'+str(traj))
 
         finished = False
         if self.if_task_finished() > 0:
             rewards += self.if_task_finished()  #reward when task finish
+            hit += self.if_task_finished()
+            self.wrap_env.done = 0
             finished = True
         logger.info('##########rewards: '+str(rewards))
-        rewards = rewards - 1  #reward at each time step
+        rewards = rewards - 0.01  #reward at each time step
 
 
         achievement = self.wrap_env.achievements
@@ -144,7 +142,8 @@ class ReactAgent:
                 self.wrap_env.previous_observation = ''
                 #break  ##如果加break就是检测到第一个新增subgoal就停止,否则检测所有新增
 
-        return scratchpad, obs, rewards, finished, self.achieve_subgoal, self.previous_action, self.previous_observation
+        traj.append(scratchpad)
+        return traj, obs, rewards, hit, finished, self.achieve_subgoal, self.previous_action, self.previous_observation
 
     def update_memory(self, subgoals, achieve_subgoal, pre_action, pre_observation):
         logger.info('--------------------------Mem upd----------------------------')
@@ -173,7 +172,8 @@ class ReactAgent:
                     ids=["id_" + achieve_subgoal[i] + pre_observation[i]])
                 logger.info('***********mem2:' + ach_subgoal)
 
-    def get_next_action(self, scratchpad, k_sent):
+    def get_next_action(self, traj, k_sent):
+        scratchpad = '\n'.join(traj)
         action = self.prompt_agent(scratchpad, k_sent)
         return action
 

@@ -31,26 +31,28 @@ def get_max_obslen(ds):
 
 #task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond'])
 task = 'collect_wood'
-num_updates = 1   ##??最大步数
+num_updates = 2000   ##??最大步数
  
 # writer = SummaryWriter(f"../writer/test")
 policy = Policy(max_obs = 200)  
-pre_global_step, global_step = 0, 0
-no_q = 0
+global_step, no_q  = 0, 0
+
 for update in range(1, num_updates + 1):
-    
+    total_reward, hits = 0, 0
+    logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   
-    logger.info('==========='+str(task))
+    #logger.info('==========='+str(task))
 
     frac = 1.0 - (update - 1.0) / num_updates
-    global_step = policy.trainer(task, global_step, frac, writer=None)
+    global_step, reward, hits = policy.trainer(task, global_step, frac, hits, writer=None)
             
-    # policy.agent.save(global_step // 10000, "./")
-    # if global_step // 1000 == 0: 
-    #     policy.agent.save(global_step // 1000, "./")
-    pre_global_step = global_step
-    logger.info('===========Current step: '+str(global_step))
+
+    if global_step // 200 == 0 : 
+        policy.agent.save(global_step // 200, "../result/")
+
+    total_reward += reward
+    logger.info('===========Current step: {},  =====total_reward: {}, =====hits: {}'.format(global_step, total_reward, hits))
     no_q += 1
 
 # writer.close()

@@ -1,5 +1,5 @@
 import json
-
+from action import logger
 
 class WrapEnv:
     def __init__(self, env):
@@ -32,7 +32,8 @@ class WrapEnv:
     def cutoutObs(self, desc):
         index_start = desc.find("Your status:")
         index_end = desc.find("energy:") + 13
-        head = desc[:index_start]
+        index_prestart = desc.find("You see:")
+        head = desc[index_prestart:index_start]
         tail = desc[index_end:]
         return head + tail
 
@@ -46,8 +47,9 @@ class WrapEnv:
         decs = list()
 
         for i in indexs:
+            print(i)
             _, _, done, info = self._env.step(i)
-            obs = self.cutoutObs(info['obs'])
+            obs = self.cutoutObs(info['obs']).replace('\n',' ')
             #self.achievements = info['achievements']
 
             decs.append(obs)
@@ -60,8 +62,12 @@ class WrapEnv:
                             self.done += 1
             except:
                 if self.achievements[self.taskname] != info['achievements'][self.taskname]:
+                    logger.info('^^^^^^^^^^self.achievements:'+str(self.achievements))
+                    logger.info('^^^^^^^^^^info[achievements]:'+str(info['achievements']))
                     self.done = 1
-
+                    
+            self.achievements = info['achievements']
+  
         return decs
 
     def subgoals_progress(self, all=False):

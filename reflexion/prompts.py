@@ -1,9 +1,9 @@
 from langchain.prompts import PromptTemplate
 
 ##Performing steps based solely on the previous scratchpad (thought/action/observation)
-REACT_INSTRUCTION = REACT_INSTRUCTION = """You’re a player trying to play the game of Crafter. 
+REACT_INSTRUCTION = REACT_INSTRUCTION = """You're a player trying to play the game of Crafter. 
 Given the player’s current observation, you can only select one action in the list below:
-Act: [Noop, 0], Act: [Move West, 1], Act: [Move East, 2], Act: [Move North, 3], Act: [Move South, 4],
+Act: [Move West, 1], Act: [Move East, 2], Act: [Move North, 3], Act: [Move South, 4],
 Act: [Do, 5], Act: [Sleep, 6], Act: [Place Stone, 7], Act: [Place Table, 8], Act: [Place Furnace, 9],
 Act: [Place Plant, 10], Act: [Make Wood Pickaxe, 11], Act: [ Make Stone Pickaxe, 12], Act: [Make Iron Pickaxe, 13], 
 Act: [Make Wood Sword, 14], Act: [Make Stone Sword, 15], Act: [Make Iron Sword, 16] 
@@ -13,7 +13,7 @@ Here are some examples:
 (END OF EXAMPLES)
 
 Task: {task}
-The player’s in game observation and previous experience for reference: {get_observation}
+The player’s in game observation and previous experience: {get_observation}
 """
 
 

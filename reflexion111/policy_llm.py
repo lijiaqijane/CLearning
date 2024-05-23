@@ -35,7 +35,7 @@ class LLMAgent(nn.Module):
         super().__init__()
 
         self.load_8bit = load_8bit
-        self.base_model = '/scratch2/nlp/plm/Llama-2-13b-chat-hf' #Meta-Llama-3-8B-Instruct
+        self.base_model = '/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct' #Meta-Llama-3-8B-Instruct
         self.lora_r  = 8
         self.lora_alpha = 16
         self.lora_dropout = 0
@@ -176,7 +176,7 @@ class LLMAgent(nn.Module):
                 num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
                 eos_token_id=self.tokenizer.eos_token_id,
             )
-            res = sequences[0]['generated_text'].split(prompt)[1].strip('\n')
+            res = sequences[0]['generated_text'].split(prompt)[1].split('\n')[0]
             if i !=' Act: [':
                 cand.append(i+res)
             else:

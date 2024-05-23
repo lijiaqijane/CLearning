@@ -26,7 +26,7 @@ class Policy(nn.Module):
     def __init__(self, max_obs):
         super().__init__()
 
-        self.num_steps = 500
+        self.num_steps = 50
         self.gamma = 0.99
         self.gae_lambda = 0.95
         self.policy_num_minibatches = self.num_steps
@@ -82,6 +82,7 @@ class Policy(nn.Module):
         self.steps = torch.zeros((self.num_steps, 1)).to(self.device)
         #self.action_list = ["Thought","Search","Ask"]
         self.candidate_action_num = 1
+        self.scratchpad = ''
 
     def format_action(self, action_list):
         actions = []
@@ -91,7 +92,12 @@ class Policy(nn.Module):
             actions.append(i)
         return actions
 
-    def trainer(self, task, step_cnt, frac, writer = None, is_warmup = False):  ##？？做对提前结束
+    def cutoff_obs(self, traj):
+        if len(traj) > 3:
+            traj.pop(0)
+        return traj
+
+    def trainer(self, task, step_cnt, frac, hit, writer, is_warmup = False):  ##？？做对提前结束
         #logger.info('max_obs:'+str(self.obs_length))
 
         #prepare craft env
@@ -101,7 +107,8 @@ class Policy(nn.Module):
 
         reagent = ReactAgent(task, env)  
         observation = str(env.steps(['0.Noop'])[0])  
-        self.scratchpad = observation   
+        trajectory = [observation+'\n' ]
+        self.scratchpad = '\n'.join(trajectory)
 
         self.next_done = torch.zeros(1).to(self.device)
         self.next_obs = self.agent.tokenizer(observation, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
@@ -118,7 +125,7 @@ class Policy(nn.Module):
 
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                action_list = reagent.get_next_action(self.scratchpad, self.candidate_action_num)
+                action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
                 
                 logger.info('action_list:'+str(action_list))
                 action, logprob, _, value = self.agent.get_action_and_value([next_obs_str], action_list)
@@ -131,8 +138,8 @@ class Policy(nn.Module):
             # logger.info(logprob)
 
             action_str = action_list[action.item()]
-            scratchpad, next_obs, reward, done, ach, preact, preobs = reagent.step(action_str, self.scratchpad, next_obs_str, reward)
-            self.scratchpad = scratchpad
+            trajectory, next_obs, reward, hit, done, ach, preact, preobs = reagent.step(action_str, trajectory , next_obs_str, reward, hit)
+            trajectory = self.cutoff_obs(trajectory)
 
 
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) ##??
@@ -321,10 +328,7 @@ class Policy(nn.Module):
         # writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
         # writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
         
-
-        #self.agent.save(step_cnt + 1, f"../../result")
-
-        return step_cnt
+        return step_cnt, reward, hit
 
         
     
