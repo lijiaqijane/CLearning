@@ -5,41 +5,38 @@ Use pytorch device: cuda
 Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
 Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
 Use pytorch device: cuda
-===========Current train update: 1
-Loaded 1572 Programmatic tasks, 1558 Creative tasks, and 1 special task: "Playthrough". Totally 3131 tasks loaded.
-action_list:[' Act: _____________']
-------step----- Act: _____________
-------argument---['_____________']
-------action-----['0.Noop']
-------scratchpad-----['You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  You have nothing in your inventory.\n']
-##########rewards: 0
-action_list:[' Act: Move West, 1']
-------step----- Act: Move West, 1
-------argument---['Move West', '1']
-------action-----['1.Move West']
-------scratchpad-----['You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  You have nothing in your inventory.\n', 'Act: _____________\nInvalid Action! \n']
-##########rewards: -0.01
-action_list:[' Act: Insert here what action you want to take next']
-------step----- Act: Insert here what action you want to take next
-------argument---['Insert here what action you want to take next']
-------action-----['0.Noop']
-------scratchpad-----['You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  You have nothing in your inventory.\n', 'Act: _____________\nInvalid Action! \n', 'Act: Move West, 1\nObservation: You see: - grass 1 steps to your west - tree 3 steps to your south - cow 6 steps to your north-west  You face grass at your front.  You have nothing in your inventory.\n']
-##########rewards: -0.02
-action_list:[' Act:  ']
-------step----- Act:  
-------argument---['']
-------action-----['0.Noop']
-------scratchpad-----['Act: _____________\nInvalid Action! \n', 'Act: Move West, 1\nObservation: You see: - grass 1 steps to your west - tree 3 steps to your south - cow 6 steps to your north-west  You face grass at your front.  You have nothing in your inventory.\n', 'Act: Insert here what action you want to take next\nInvalid Action! \n']
-##########rewards: -0.03
-action_list:[' Act: Insert your chosen action from the given options']
-------step----- Act: Insert your chosen action from the given options
-------argument---['Insert your chosen action from the given options']
-------action-----['0.Noop']
-------scratchpad-----['Act: Move West, 1\nObservation: You see: - grass 1 steps to your west - tree 3 steps to your south - cow 6 steps to your north-west  You face grass at your front.  You have nothing in your inventory.\n', 'Act: Insert here what action you want to take next\nInvalid Action! \n', 'Act: \nInvalid Action! \nObservation: You see: - grass 1 steps to your west - tree 3 steps to your south - cow 5 steps to your north-west  You face grass at your front.  You have nothing in your inventory.\n']
-##########rewards: -0.04
-action_list:[' Act: Do, 5']
-------step----- Act: Do, 5
-------argument---['Do', '5']
-------action-----['5.Do']
-------scratchpad-----['Act: Insert here what action you want to take next\nInvalid Action! \n', 'Act: \nInvalid Action! \nObservation: You see: - grass 1 steps to your west - tree 3 steps to your south - cow 5 steps to your north-west  You face grass at your front.  You have nothing in your inventory.\n', 'Act: Insert your chosen action from the given options\nInvalid Action! \n']
-##########rewards: -0.05
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
+Use pytorch device: cuda
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda
+Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
+Use pytorch device: cuda

@@ -26,7 +26,7 @@ class Policy(nn.Module):
     def __init__(self, max_obs):
         super().__init__()
 
-        self.num_steps = 100
+        self.num_steps = 50
         self.gamma = 0.99
         self.gae_lambda = 0.95
         self.policy_num_minibatches = self.num_steps
@@ -126,15 +126,20 @@ class Policy(nn.Module):
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
 
-                ##exp: random select from 4 action candidates
-                p = np.array([0.1,0.1,0.1,0.7])
-                org_action_list = action_list
-                action_list = [ org_action_list[np.random.choice([0,1,2,3],p=p.ravel())] ]
-                ##exp: random select from 4 action candidates
-
-                action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
+                # action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
                 
-                logger.info('action_list:'+str(action_list))
+                # logger.info('action_list:'+str(action_list))
+                # ##exp: random select from 4 action candidates
+                # p = np.array([0.1,0.1,0.1,0.7])
+                # org_action_list = action_list
+                # action_list = [ org_action_list[np.random.choice([0,1,2,3],p=p.ravel())] ]
+                # ##exp: random select from 4 action candidates
+                action_list = ["Act: Move West, 1", "Act: Move East, 2", "Act: Move North, 3", "Act: Move South, 4",
+"Act: Do, 5", "Act: Sleep, 6", "Act: Place Stone, 7", "Act: Place Table, 8", "Act: Place Furnace, 9",
+"Act: Place Plant, 10", "Act: Make Wood Pickaxe, 11", "Act: Make Stone Pickaxe, 12", "Act: Make Iron Pickaxe, 13", 
+"Act: Make Wood Sword, 14", "Act: Make Stone Sword, 15", "Act: Make Iron Sword, 16"]
+
+
                 action, logprob, _, value = self.agent.get_action_and_value([next_obs_str], action_list)
                 self.values[step] = value.flatten()
             self.actions[step] = action
@@ -275,12 +280,12 @@ class Policy(nn.Module):
 
 
                 mb_advantages = b_advantages[mb_inds]
-                logger.info('mb_advantages:'+str(mb_advantages))
+                #logger.info('mb_advantages:'+str(mb_advantages))
 
                 if self.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
 
-                logger.info('mb_advantages:'+str(mb_advantages))
+                #logger.info('mb_advantages:'+str(mb_advantages))
                 # Policy loss
                 pg_loss1 = -mb_advantages * ratio
                 pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - self.clip_coef, 1 + self.clip_coef)

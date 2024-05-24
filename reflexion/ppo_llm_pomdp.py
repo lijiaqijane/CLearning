@@ -48,7 +48,7 @@ class Policy(nn.Module):
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
         self.resume = False
-        self.load_path = "../../result/epoch_0002"
+        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/e3-actonly-gen-step1500/"
         self.normalization_mode = "word"
 
         random.seed(self.seed)
@@ -268,12 +268,12 @@ class Policy(nn.Module):
 
 
                 mb_advantages = b_advantages[mb_inds]
-                logger.info('mb_advantages:'+str(mb_advantages))
+                #logger.info('mb_advantages:'+str(mb_advantages))
 
                 if self.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
 
-                logger.info('mb_advantages:'+str(mb_advantages))
+                #logger.info('mb_advantages:'+str(mb_advantages))
                 # Policy loss
                 pg_loss1 = -mb_advantages * ratio
                 pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - self.clip_coef, 1 + self.clip_coef)

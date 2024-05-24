@@ -47,9 +47,8 @@ for update in range(1, num_updates + 1):
     frac = 1.0 - (update - 1.0) / num_updates
     global_step, reward, hits = policy.trainer(task, global_step, frac, hits, writer=None)
             
-
-    if global_step // 200 == 0 : 
-        policy.agent.save(global_step // 200, "../result/")
+    if global_step // 500 > 0 : 
+        policy.agent.save(global_step // 500, "../result/")
 
     total_reward += reward
     logger.info('===========Current step: {},  =====total_reward: {}, =====hits: {}'.format(global_step, total_reward, hits))

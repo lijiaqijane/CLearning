@@ -171,7 +171,7 @@ class LLMAgent(nn.Module):
             sequences = pipeline(
                 prompt,
                 do_sample=True,
-                top_k = 30,
+                top_k = 10,
                 #top_p=0.85,
                 num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
                 eos_token_id=self.tokenizer.eos_token_id,

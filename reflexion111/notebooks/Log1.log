@@ -1,7 +1,0 @@
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
