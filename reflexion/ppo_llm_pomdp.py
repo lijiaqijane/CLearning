@@ -26,7 +26,7 @@ class Policy(nn.Module):
     def __init__(self, max_obs):
         super().__init__()
 
-        self.num_steps = 50
+        self.num_steps = 500
         self.gamma = 0.99
         self.gae_lambda = 0.95
         self.policy_num_minibatches = self.num_steps
@@ -97,7 +97,7 @@ class Policy(nn.Module):
             traj.pop(0)
         return traj
 
-    def trainer(self, task, step_cnt, frac, hit, writer, is_warmup = False):  ##？？做对提前结束
+    def trainer(self, task, step_cnt, frac,  writer, is_warmup = False):  ##？？做对提前结束
         #logger.info('max_obs:'+str(self.obs_length))
 
         #prepare craft env
@@ -116,7 +116,6 @@ class Policy(nn.Module):
         self.policy_optimizer.param_groups[0]["lr"] = frac * self.policy_learning_rate
         self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
             
-        reward = 0
         for step in range(0, self.num_steps):
             step_cnt += 1 
             self.obs[step] = self.next_obs
@@ -138,9 +137,9 @@ class Policy(nn.Module):
             # logger.info(logprob)
 
             action_str = action_list[action.item()]
-            trajectory, next_obs, reward, hit, done, ach, preact, preobs = reagent.step(action_str, trajectory , next_obs_str, reward, hit)
+            trajectory, next_obs, reward, achievement, done, ach_subg, preact, preobs = reagent.step(action_str,  trajectory , next_obs_str)
             trajectory = self.cutoff_obs(trajectory)
-
+            logger.info('###########rewards: {}, step: {}'.format(reward, step))
 
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) ##??
             self.next_obs = self.agent.tokenizer(next_obs, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
@@ -149,7 +148,7 @@ class Policy(nn.Module):
 
 
         # memory update
-        reagent.update_memory(env.subgoal, ach, preact, preobs)
+        #reagent.update_memory(env.subgoal, ach_subg, preact, preobs)
 
         # bootstrap value if not done
         with torch.no_grad():
@@ -328,7 +327,7 @@ class Policy(nn.Module):
         # writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
         # writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
         
-        return step_cnt, reward, hit
+        return step_cnt, reward, achievement
 
         
     

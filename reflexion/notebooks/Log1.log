@@ -1,42 +1,106 @@
 Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
+HTTP Request: GET https://api.gradio.app/gradio-messaging/en "HTTP/1.1 200 OK"
 Use pytorch device: cuda
 Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
 Use pytorch device: cuda
 Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
 Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
 Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/bert-base-nli-mean-tokens
-Use pytorch device: cuda
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
-Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
-Load pretrained SentenceTransformer: /scratch/nlp/lijiaqi/models/all-MiniLM-L6-v2
-Use pytorch device: cuda
+===========Current train update: 1
+Loaded 1572 Programmatic tasks, 1558 Creative tasks, and 1 special task: "Playthrough". Totally 3131 tasks loaded.
+action_list:[' Act: _____, _______']
+------step----- Act: _____, _______
+------argument---['_____', '_______']
+------action-----['0.Noop']
+------scratchpad-----['You took action noop.  You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 0
+action_list:[' Act: Place Stone, 7']
+------step----- Act: Place Stone, 7
+------argument---['Place Stone', '7']
+------action-----['7.Place Stone']
+------scratchpad-----['You took action noop.  You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: _____, _______\nInvalid Action! \n']
+###########rewards: 0.0, step: 1
+action_list:[' Act: Move East, 2']
+------step----- Act: Move East, 2
+------argument---['Move East', '2']
+------action-----['2.Move East']
+------scratchpad-----['You took action noop.  You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: _____, _______\nInvalid Action! \n', 'Act: Place Stone, 7\nObservation: You took action place_stone.  You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 2
+action_list:[' Act:  ']
+------step----- Act:  
+------argument---['']
+------action-----['0.Noop']
+------scratchpad-----['Act: _____, _______\nInvalid Action! \n', 'Act: Place Stone, 7\nObservation: You took action place_stone.  You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Move East, 2\nObservation: You took action move_east.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 3
+action_list:[' Act: Move West, 1']
+------step----- Act: Move West, 1
+------argument---['Move West', '1']
+------action-----['1.Move West']
+------scratchpad-----['Act: Place Stone, 7\nObservation: You took action place_stone.  You see: - grass 1 steps to your west - tree 4 steps to your south-west - cow 6 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Move East, 2\nObservation: You took action move_east.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: \nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 4
+action_list:[' Act: Do, 5']
+------step----- Act: Do, 5
+------argument---['Do', '5']
+------action-----['5.Do']
+------scratchpad-----['Act: Move East, 2\nObservation: You took action move_east.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: \nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Move West, 1\nObservation: You took action move_west.  You see: - grass 1 steps to your west - tree 4 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 5
+action_list:[' Act: Move East, 2']
+------step----- Act: Move East, 2
+------argument---['Move East', '2']
+------action-----['2.Move East']
+------scratchpad-----['Act: \nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Move West, 1\nObservation: You took action move_west.  You see: - grass 1 steps to your west - tree 4 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Do, 5\nObservation: You took action do.  You see: - grass 1 steps to your west - tree 4 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 6
+action_list:[' Act: Your turn']
+------step----- Act: Your turn
+------argument---['Your turn']
+------action-----['0.Noop']
+------scratchpad-----['Act: Move West, 1\nObservation: You took action move_west.  You see: - grass 1 steps to your west - tree 4 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Do, 5\nObservation: You took action do.  You see: - grass 1 steps to your west - tree 4 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Move East, 2\nObservation: You took action move_east.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 7
+action_list:[' Act: Make Stone Pickaxe, 12']
+------step----- Act: Make Stone Pickaxe, 12
+------argument---['Make Stone Pickaxe', '12']
+------action-----['12.Make Stone Pickaxe']
+------scratchpad-----['Act: Do, 5\nObservation: You took action do.  You see: - grass 1 steps to your west - tree 4 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Move East, 2\nObservation: You took action move_east.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Your turn\nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 8
+action_list:[' Act: ? ']
+------step----- Act: ? 
+------argument---['?']
+------action-----['0.Noop']
+------scratchpad-----['Act: Move East, 2\nObservation: You took action move_east.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Your turn\nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Make Stone Pickaxe, 12\nObservation: You took action make_stone_pickaxe.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 9
+action_list:[' Act: Make Stone Pickaxe, 12']
+------step----- Act: Make Stone Pickaxe, 12
+------argument---['Make Stone Pickaxe', '12']
+------action-----['12.Make Stone Pickaxe']
+------scratchpad-----['Act: Your turn\nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Make Stone Pickaxe, 12\nObservation: You took action make_stone_pickaxe.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: ?\nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 10
+action_list:[' Act:  ']
+------step----- Act:  
+------argument---['']
+------action-----['0.Noop']
+------scratchpad-----['Act: Make Stone Pickaxe, 12\nObservation: You took action make_stone_pickaxe.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your south-east  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: ?\nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Make Stone Pickaxe, 12\nObservation: You took action make_stone_pickaxe.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your north-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 11
+action_list:[' Act: ?']
+------step----- Act: ?
+------argument---['?']
+------action-----['0.Noop']
+------scratchpad-----['Act: ?\nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Make Stone Pickaxe, 12\nObservation: You took action make_stone_pickaxe.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your north-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: \nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 12
+action_list:[' Act: Place Stone, 7']
+------step----- Act: Place Stone, 7
+------argument---['Place Stone', '7']
+------action-----['7.Place Stone']
+------scratchpad-----['Act: Make Stone Pickaxe, 12\nObservation: You took action make_stone_pickaxe.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 4 steps to your north-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: \nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: ?\nInvalid Action! \n']
+###########rewards: 0.0, step: 13
+action_list:[' Act: Do, 5']
+------step----- Act: Do, 5
+------argument---['Do', '5']
+------action-----['5.Do']
+------scratchpad-----['Act: \nInvalid Action! \nObservation: You took action noop.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: ?\nInvalid Action! \n', 'Act: Place Stone, 7\nObservation: You took action place_stone.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 14
+action_list:[' Act: Move South, 4']
+------step----- Act: Move South, 4
+------argument---['Move South', '4']
+------action-----['4.Move South']
+------scratchpad-----['Act: ?\nInvalid Action! \n', 'Act: Place Stone, 7\nObservation: You took action place_stone.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n', 'Act: Do, 5\nObservation: You took action do.  You see: - grass 1 steps to your west - tree 5 steps to your south-west - cow 3 steps to your south-west  You face grass at your front.  Your status: - health: 9/9 - food: 9/9 - drink: 9/9 - energy: 9/9  You have nothing in your inventory.\n']
+###########rewards: 0.0, step: 15

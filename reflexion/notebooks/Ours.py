@@ -27,34 +27,53 @@ def get_max_obslen(ds):
             max_seq_len = length
     return max_seq_len
 
-
-
-#task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond'])
-task = 'collect_wood'
-num_updates = 2000   ##??最大步数
+def get_achievement(pre_ach, ach):
+    new_ach = {}
+    #pre_ach, ach = json.loads(pre_ach), json.loads(ach)
+    for i in ach:
+        if ach[i] > pre_ach[i]:
+            new_ach[i] = ach[i] - pre_ach[i]
+    return new_ach
+        
+        
+task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond'])
+#task = 'eat_cow'
+num_updates = 1000   ##??最大步数
  
 # writer = SummaryWriter(f"../writer/test")
 policy = Policy(max_obs = 200)  
 global_step, no_q  = 0, 0
 
 for update in range(1, num_updates + 1):
-    total_reward, hits = 0, 0
     logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   
     #logger.info('==========='+str(task))
 
+    pre_achievement = {'collect_coal': 0, 'collect_diamond': 0, 'collect_drink': 0, 'collect_iron': 0,
+                             'collect_sapling': 0, 'collect_stone': 0, 'collect_wood': 0, 'defeat_skeleton': 0,
+                             'defeat_zombie': 0, 'eat_cow': 0, 'eat_plant': 0, 'make_iron_pickaxe': 0,
+                             'make_iron_sword': 0, 'make_stone_pickaxe': 0, 'make_stone_sword': 0,
+                             'make_wood_pickaxe': 0, 'make_wood_sword': 0, 'place_furnace': 0, 'place_plant': 0,
+                             'place_stone': 0, 'place_table': 0, 'wake_up': 0}
+
     frac = 1.0 - (update - 1.0) / num_updates
-    global_step, reward, hits = policy.trainer(task, global_step, frac, hits, writer=None)
-            
+    global_step, reward, achievement= policy.trainer(task, global_step, frac, writer=None)
 
     if global_step // 500 > 0 : 
         policy.agent.save(global_step // 500, "../result/")
 
-    total_reward += reward
-    logger.info('===========Current step: {},  =====total_reward: {}, =====hits: {}'.format(global_step, total_reward, hits))
+
+    if  pre_achievement != achievement:
+        hits = get_achievement(pre_achievement, achievement)
+        logger.info('=====hits: {}'.format(hits))
+        logger.info('=====curr_ach: {}'.format(achievement))
+        pre_achievement = achievement
+    logger.info('===========Current_step: {},  =====total_reward: {}'.format(global_step, reward))
     no_q += 1
 
+
+logger.info('=====Final_ach: {}'.format(achievement))
 # writer.close()
 
 

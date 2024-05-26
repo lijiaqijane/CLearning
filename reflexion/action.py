@@ -57,7 +57,7 @@ class ReactAgent:
         self.wrap_env = env
 
         
-    def step(self, action, traj, obs, rewards, hit, scratchpad = '', action_list=['0.Noop']):
+    def step(self, action, traj, obs, scratchpad = '', action_list=['0.Noop']):
         
         self.wrap_env.previous_observation = obs  ##keep previous obs
 
@@ -91,7 +91,6 @@ class ReactAgent:
         elif action_type == 'Act':
             try:
                 executable_actions = self.wrap_env.get_executable_actions()
-
                 argument = action_content.split(', ')
 
                 ## if act: 补全2个参数
@@ -115,20 +114,10 @@ class ReactAgent:
         logger.info('------argument---'+str(argument))
 
         logger.info('------action-----'+str(action_list))
-        step_res = self.wrap_env.steps(actions_list=action_list)
-        obs = str(step_res[0])
+        obs, rewards = self.wrap_env.steps(actions_list=action_list)
         if obs not in self.wrap_env.previous_observation:
             scratchpad += 'Observation: '+obs+'\n'
         logger.info('------scratchpad-----'+str(traj))
-
-        finished = False
-        if self.if_task_finished() > 0:
-            rewards += self.if_task_finished()  #reward when task finish
-            hit += self.if_task_finished()
-            self.wrap_env.done = 0
-            finished = True
-        logger.info('##########rewards: '+str(rewards))
-        rewards = rewards - 0.01  #reward at each time step
 
 
         achievement = self.wrap_env.achievements
@@ -137,13 +126,12 @@ class ReactAgent:
                 self.achieve_subgoal.append(key)
                 self.previous_action.append(self.wrap_env.previous_action)
                 self.previous_observation.append(self.wrap_env.previous_observation)
-                rewards += 0.2 #reward when subgoal finish
                 self.wrap_env.previous_action = []
                 self.wrap_env.previous_observation = ''
                 #break  ##如果加break就是检测到第一个新增subgoal就停止,否则检测所有新增
 
         traj.append(scratchpad)
-        return traj, obs, rewards, hit, finished, self.achieve_subgoal, self.previous_action, self.previous_observation
+        return traj, obs, rewards, self.wrap_env.achievements, self.wrap_env.done, self.achieve_subgoal, self.previous_action, self.previous_observation
 
     def update_memory(self, subgoals, achieve_subgoal, pre_action, pre_observation):
         logger.info('--------------------------Mem upd----------------------------')
@@ -176,9 +164,6 @@ class ReactAgent:
         scratchpad = '\n'.join(traj)
         action = self.prompt_agent(scratchpad, k_sent)
         return action
-
-    def if_task_finished(self):  # how to get the progress if task finished
-        return self.wrap_env.done
     
     def prompt_agent(self, scratchpad, k_sent) -> str:
         pmt= self._build_agent_prompt(scratchpad)

@@ -48,27 +48,13 @@ class WrapEnv:
 
         for i in indexs:
             print(i)
-            _, _, done, info = self._env.step(i)
-            obs = self.cutoutObs(info['obs']).replace('\n',' ')
-            #self.achievements = info['achievements']
-
+            _, reward, done, info = self._env.step(i)
+            obs = info['obs'].replace('\n',' ')   #self.cutoutObs(info['obs']).replace('\n',' ')
             decs.append(obs)
-
-            try:
-                taskname = eval(self.taskname)
-                if type(taskname) is list:
-                    for i in taskname:
-                        if self.achievements[i] != info['achievements'][i]:
-                            self.done += 1
-            except:
-                if self.achievements[self.taskname] != info['achievements'][self.taskname]:
-                    logger.info('^^^^^^^^^^self.achievements:'+str(self.achievements))
-                    logger.info('^^^^^^^^^^info[achievements]:'+str(info['achievements']))
-                    self.done = 1
-                    
+            self.done = done
             self.achievements = info['achievements']
   
-        return decs
+        return decs[0], reward
 
     def subgoals_progress(self, all=False):
         if all:
@@ -82,7 +68,7 @@ class WrapEnv:
 
 
     def get_executable_actions(self):
-        return {0: 'Noop', 1: 'Move West', 2: 'Move East', 3: 'Move North', 4: 'Move South',
+        return {1: 'Move West', 2: 'Move East', 3: 'Move North', 4: 'Move South',
                                       5: 'Do',
                                       6: 'Sleep', 7: 'Place Stone',
                                       8: 'Place Table', 9: 'Place Furnace', 10: 'Place Plant', 11: 'Make Wood Pickaxe',
