@@ -47,8 +47,8 @@ class Policy(nn.Module):
         self.max_grad_norm = 0.5
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
-        self.resume = False
-        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/e3-actonly-gen-step1500/"
+        self.resume = True
+        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0009"
         self.normalization_mode = "word"
 
         random.seed(self.seed)

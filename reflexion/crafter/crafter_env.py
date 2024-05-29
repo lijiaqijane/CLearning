@@ -21,7 +21,7 @@ class WrapEnv:
         self._env.reset()
         self.taskname = task
         # output
-        with open('/scratch/nlp/lijiaqi/RAM_PPO/reflexion/crafter/subgoals.json', 'r') as file:
+        with open('/scratch/nlp/lijiaqi/CLearning/reflexion/crafter/subgoals.json', 'r') as file:
             subgoals = json.load(file)
         try:
             taskname = type(eval(self.taskname))

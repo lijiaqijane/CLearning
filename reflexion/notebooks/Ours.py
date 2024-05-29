@@ -36,15 +36,15 @@ def get_achievement(pre_ach, ach):
     return new_ach
         
         
-task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond'])
+task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond','collect_drink','collect_sapling','defeat_skeleton','defeat_zombie','eat_cow','wake_up'])
 #task = 'eat_cow'
 num_updates = 1000   ##??最大步数
  
 # writer = SummaryWriter(f"../writer/test")
 policy = Policy(max_obs = 200)  
-global_step, no_q  = 0, 0
+global_step, no_q  = 4500, 0
 
-for update in range(1, num_updates + 1):
+for update in range(10, num_updates + 1):
     logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   

@@ -99,12 +99,12 @@ class LLMAgent(nn.Module):
 
             model.print_trainable_parameters()
 
-            old_state_dict = model.state_dict
-            model.state_dict = (
-                lambda self, *_, **__: get_peft_model_state_dict(
-                    self, old_state_dict()
-                )
-            ).__get__(model, type(model))
+            # old_state_dict = model.state_dict
+            # model.state_dict = (
+            #     lambda self, *_, **__: get_peft_model_state_dict(
+            #         self, old_state_dict()
+            #     )
+            # ).__get__(model, type(model))
         else:
             model = PeftModel.from_pretrained(
                 self.llama,
@@ -113,9 +113,14 @@ class LLMAgent(nn.Module):
                 load_in_8bit=self.load_8bit,
                 device_map="auto"
             )
-
-        if torch.__version__ >= "2" and sys.platform != "win32":
-            model = torch.compile(model)
+            for name, param in model.named_parameters():
+                if 'lora' in name:
+                    param.requires_grad = True
+            model.print_trainable_parameters()
+            #print("loadpeft_savedmodels")
+            
+        # if torch.__version__ >= "2" and sys.platform != "win32":
+        #     model = torch.compile(model)
             
         return model
 
@@ -134,7 +139,7 @@ class LLMAgent(nn.Module):
             repetition_penalty=1.1,
             min_new_tokens = 30,
             max_new_tokens = self.max_token,
-            temperature=0.9,
+            temperature= 0.9,
             device_map="cuda")
         # llm = HuggingFacePipeline(pipeline=query_pipeline)
 

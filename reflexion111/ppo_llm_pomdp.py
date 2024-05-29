@@ -26,7 +26,7 @@ class Policy(nn.Module):
     def __init__(self, max_obs):
         super().__init__()
 
-        self.num_steps = 500
+        self.num_steps = 2
         self.gamma = 0.99
         self.gae_lambda = 0.95
         self.policy_num_minibatches = self.num_steps
