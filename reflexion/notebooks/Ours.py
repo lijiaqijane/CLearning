@@ -42,9 +42,9 @@ num_updates = 1000   ##??最大步数
  
 # writer = SummaryWriter(f"../writer/test")
 policy = Policy(max_obs = 200)  
-global_step, no_q  = 4500, 0
+global_step, no_q  = 6000, 0
 
-for update in range(10, num_updates + 1):
+for update in range(13, num_updates + 1):
     logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   
@@ -58,7 +58,7 @@ for update in range(10, num_updates + 1):
                              'place_stone': 0, 'place_table': 0, 'wake_up': 0}
 
     frac = 1.0 - (update - 1.0) / num_updates
-    global_step, reward, achievement= policy.trainer(task, global_step, frac, writer=None)
+    global_step, rewards, achievement= policy.trainer(task, global_step, frac, writer=None)
 
     if global_step // 500 > 0 : 
         policy.agent.save(global_step // 500, "../result/")
@@ -69,7 +69,7 @@ for update in range(10, num_updates + 1):
         logger.info('=====hits: {}'.format(hits))
         logger.info('=====curr_ach: {}'.format(achievement))
         pre_achievement = achievement
-    logger.info('===========Current_step: {},  =====total_reward: {}'.format(global_step, reward))
+    logger.info('===========Current_step: {},  =====total_reward: {}'.format(global_step, rewards))
     no_q += 1
 
 

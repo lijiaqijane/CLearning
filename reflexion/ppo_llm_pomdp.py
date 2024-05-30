@@ -48,7 +48,7 @@ class Policy(nn.Module):
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
         self.resume = True
-        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0009"
+        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_00012"
         self.normalization_mode = "word"
 
         random.seed(self.seed)
@@ -115,7 +115,8 @@ class Policy(nn.Module):
 
         self.policy_optimizer.param_groups[0]["lr"] = frac * self.policy_learning_rate
         self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
-            
+        
+        rewards = 0
         for step in range(0, self.num_steps):
             step_cnt += 1 
             self.obs[step] = self.next_obs
@@ -139,7 +140,8 @@ class Policy(nn.Module):
             action_str = action_list[action.item()]
             trajectory, next_obs, reward, achievement, done, ach_subg, preact, preobs = reagent.step(action_str,  trajectory , next_obs_str)
             trajectory = self.cutoff_obs(trajectory)
-            logger.info('###########rewards: {}, step: {}'.format(reward, step))
+            logger.info('###########reward: {}, step: {}'.format(reward, step))
+            rewards += reward
 
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) ##??
             self.next_obs = self.agent.tokenizer(next_obs, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
@@ -327,7 +329,7 @@ class Policy(nn.Module):
         # writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
         # writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
         
-        return step_cnt, reward, achievement
+        return step_cnt, rewards, achievement
 
         
     
