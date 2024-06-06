@@ -7,7 +7,6 @@ class Critic(nn.Module):
         super().__init__()
         self.config = base_model.config
         self.num_padding_at_beginning = num_padding_at_beginning
-
         if hasattr(self.config, "word_embed_proj_dim"):
             self.v_head = nn.Linear(self.config.word_embed_proj_dim,
                                     1,

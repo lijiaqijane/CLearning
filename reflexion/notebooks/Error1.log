@@ -1,29 +1,13 @@
-Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [01:38<04:54, 98.29s/it]Loading checkpoint shards:  50%|█████     | 2/4 [03:51<03:58, 119.10s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [05:36<01:52, 112.62s/it]Loading checkpoint shards: 100%|██████████| 4/4 [05:50<00:00, 73.65s/it] Loading checkpoint shards: 100%|██████████| 4/4 [05:50<00:00, 87.69s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.87s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.82s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.82s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.32s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.51s/it]
 ----------------load model
-Traceback (most recent call last):
-  File "/scratch/lijiaqi/.conda/envs/craft/lib/python3.9/site-packages/peft/config.py", line 197, in _get_peft_type
-    config_file = hf_hub_download(
-  File "/scratch/lijiaqi/.conda/envs/craft/lib/python3.9/site-packages/huggingface_hub/utils/_validators.py", line 111, in _inner_fn
-    validate_repo_id(arg_value)
-  File "/scratch/lijiaqi/.conda/envs/craft/lib/python3.9/site-packages/huggingface_hub/utils/_validators.py", line 159, in validate_repo_id
-    raise HFValidationError(
-huggingface_hub.utils._validators.HFValidationError: Repo id must be in the form 'repo_name' or 'namespace/repo_name': '/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_00012'. Use `repo_type` argument if needed.
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/scratch/nlp/lijiaqi/CLearning/reflexion/notebooks/Ours.py", line 44, in <module>
-    policy = Policy(max_obs = 200)  
-  File "../ppo_llm_pomdp.py", line 65, in __init__
-    self.agent = LLMAgent(normalization_mode=self.normalization_mode, load_path=self.load_path, load_8bit=True)
-  File "../policy_llm.py", line 61, in __init__
-    self.load(load_path)
-  File "../policy_llm.py", line 213, in load
-    self.actor = self._init_actor(lora_weights).to(self.device)
-  File "../policy_llm.py", line 109, in _init_actor
-    model = PeftModel.from_pretrained(
-  File "/scratch/lijiaqi/.conda/envs/craft/lib/python3.9/site-packages/peft/peft_model.py", line 328, in from_pretrained
-    PeftConfig._get_peft_type(
-  File "/scratch/lijiaqi/.conda/envs/craft/lib/python3.9/site-packages/peft/config.py", line 203, in _get_peft_type
-    raise ValueError(f"Can't find '{CONFIG_NAME}' at '{model_id}'")
-ValueError: Can't find 'adapter_config.json' at '/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_00012'
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+[INFO:minedojo.tasks] Loaded 1572 Programmatic tasks, 1558 Creative tasks, and 1 special task: "Playthrough". Totally 3131 tasks loaded.
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.64s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.67s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.63s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.36s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.72s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.74s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.71s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.46s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.25s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:01,  1.91s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.37s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.65s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.19s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.21s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.17s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.65s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.84s/it]

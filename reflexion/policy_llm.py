@@ -25,6 +25,8 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.orthogonal_(layer.weight, std)
@@ -72,8 +74,6 @@ class LLMAgent(nn.Module):
             cache_dir=os.path.join(root, 'weights/llama')
         )
         #model.gradient_checkpointing_enable()
-
-
         # if not self.load_8bit:
         #     model.half().to(self.device)
         # else:
@@ -92,11 +92,7 @@ class LLMAgent(nn.Module):
                 bias="none",
                 task_type="CAUSAL_LM",
             )
-            #peft_config = get_peft_config(config)
-            
             model = get_peft_model(self.llama, config)
-            #model = prepare_model_for_kbit_training(model) #, use_gradient_checkpointing=True
-
             model.print_trainable_parameters()
 
             # old_state_dict = model.state_dict
@@ -127,7 +123,7 @@ class LLMAgent(nn.Module):
     def _init_critic(self, critic_weights = None):
         critic = Critic(self.actor, self.tokenizer)
         if critic_weights is not None:
-            critic.v_head_mlp3.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
+            critic.v_head_mlp3.load_state_dict(torch.load(critic_weights, map_location= "cpu")) #!critic.v_head.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
         return critic
 
 
@@ -140,7 +136,7 @@ class LLMAgent(nn.Module):
             min_new_tokens = 30,
             max_new_tokens = self.max_token,
             temperature= 0.9,
-            device_map="cuda")
+            device_map="auto")
         # llm = HuggingFacePipeline(pipeline=query_pipeline)
 
         sequences = pipeline(
@@ -233,7 +229,7 @@ class LLMAgent(nn.Module):
         for p, ac in zip(prompt, action_list):
             sequence += [p + " " + a for a in ac]
 
-        # print(sequence)
+
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
         input_ids = inputs["input_ids"].to(self.device)
         
@@ -273,6 +269,7 @@ class LLMAgent(nn.Module):
         action_logits = action_logits.reshape(-1, action_num).float()
 
         probs = Categorical(logits=action_logits)
+
         if action is None:
             action = probs.sample()
 

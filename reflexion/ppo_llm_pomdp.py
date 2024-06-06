@@ -23,10 +23,10 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
 class Policy(nn.Module):
 
-    def __init__(self, max_obs):
+    def __init__(self, max_steps, max_obs):
         super().__init__()
 
-        self.num_steps = 500
+        self.num_steps = max_steps
         self.gamma = 0.99
         self.gae_lambda = 0.95
         self.policy_num_minibatches = self.num_steps
@@ -34,7 +34,7 @@ class Policy(nn.Module):
         self.update_epochs = 1
         self.batch_size = self.num_steps
         self.policy_minibatch_size = int(self.batch_size // self.policy_num_minibatches)
-        self.value_minibatch_size = int(self.batch_size // self.value_num_minibatches)
+        self.value_minibatch_size = int(self.batch_size // (self.value_num_minibatches*0.25))
         self.seed = 1
         self.cuda = True
         self.policy_learning_rate = 5e-7
@@ -48,8 +48,9 @@ class Policy(nn.Module):
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
         self.resume = True
-        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_00012"
+        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0002"
         self.normalization_mode = "word"
+
 
         random.seed(self.seed)
         np.random.seed(self.seed)
@@ -98,7 +99,6 @@ class Policy(nn.Module):
         return traj
 
     def trainer(self, task, step_cnt, frac,  writer, is_warmup = False):  ##？？做对提前结束
-        #logger.info('max_obs:'+str(self.obs_length))
 
         #prepare craft env
         env = gym.make("smartplay:Crafter-v0")
@@ -125,19 +125,47 @@ class Policy(nn.Module):
 
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
-                
-                logger.info('action_list:'+str(action_list))
+                action_list = ['Noop','Move West',  'Move East', 'Move North', 'Move South',
+                                'Do', 'Sleep', 'Place Stone','Place Table', 'Place Furnace', 'Place Plant', 'Make Wood Pickaxe',
+                                 'Make Stone Pickaxe', 'Make Iron Pickaxe', 'Make Wood Sword','Make Stone Sword','Make Iron Sword']
+                ##way1: orgin
+                #action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
+
+                ##way2: step +1 only valid action
+                # executable_actions = env.get_executable_actions()
+                # action_list = []
+                # while len(action_list) < 3:
+                #     trys, try_tag = 1, False 
+                #     while trys < 6:
+                #         actionlist = reagent.get_next_action(trajectory, self.candidate_action_num)
+                #         logger.info('gen action_list:'+str(actionlist))
+                #         argument = actionlist[0].split(':')[1].strip(' ').split(', ')
+                #         if len(argument) == 2 and argument[0] in list(executable_actions.keys()) and int(argument[1]) in list(executable_actions.values()):
+                #             try_tag = True
+                #             action_list.extend(actionlist)
+                #             break
+                #         trys += 1
+                #     if try_tag is False:
+                #         actionlist = random.sample([ 'Act: ' +value+', '+str(key)  for key,value in executable_actions.items() ], self.candidate_action_num)
+                #         action_list.extend(actionlist)
+                #         logger.info('sample action_list:'+str(actionlist))
+                # ###step +1 only valid action
+                #logger.info('final action_list:'+str(action_list))
+
+                ##way3:  concat prompt + action
                 action, logprob, _, value = self.agent.get_action_and_value([next_obs_str], action_list)
                 self.values[step] = value.flatten()
+                #logger.info('logprob  '+str(logprob))
             self.actions[step] = action
             self.logprobs[step] = logprob
-            
-            # logger.info(self.actions.shape)
-            # logger.info(value)
-            # logger.info(logprob)
 
-            action_str = action_list[action.item()]
+            ##orgin
+            #action_str = action_list[action.item()] 
+
+            executable_actions = env.get_executable_actions()
+            executable_action = action_list[action.item()]
+            action_str = 'Act: '+executable_action+', '+str(executable_actions[executable_action])
+            #logger.info('get_action_and_value:'+str(action_str)+'   '+str(value))
             trajectory, next_obs, reward, achievement, done, ach_subg, preact, preobs = reagent.step(action_str,  trajectory , next_obs_str)
             trajectory = self.cutoff_obs(trajectory)
             logger.info('###########reward: {}, step: {}'.format(reward, step))
@@ -152,7 +180,7 @@ class Policy(nn.Module):
         # memory update
         #reagent.update_memory(env.subgoal, ach_subg, preact, preobs)
 
-        # bootstrap value if not done
+            # bootstrap value if not done
         with torch.no_grad():
 
             next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
@@ -182,6 +210,8 @@ class Policy(nn.Module):
         b_obs = self.obs.reshape((-1,) + (self.obs_length,))
         b_logprobs = self.logprobs.reshape(-1)
         b_actions = self.actions.reshape((-1,) )
+        #logger.info('self.actions  '+str(self.actions))
+
         b_advantages = advantages.reshape(-1)
         b_returns = returns.reshape(-1)
         b_values = self.values.reshape(-1)
@@ -241,23 +271,38 @@ class Policy(nn.Module):
                 self.value_optimizer.step()
             
             logger.info('Update value')
+            logger.info('value_loss  '+str(loss.item()))
+            logger.info('value_loss  '+str(v_loss.item()))
 
             self.policy_optimizer.zero_grad()            
             #update policy
+            print('---------------------------------')
             for start in range(0, self.batch_size, self.policy_minibatch_size):
                 if policy_update_steps % self.gradient_checkpointing_steps == 0:
                     total_approx_kl = 0
                 policy_update_steps += 1
                 end = start + self.policy_minibatch_size
+                # logger.info('start:'+str(start))
+                # logger.info('end:'+str(end))
+                # logger.info('b_inds[start:end]:'+str(b_inds[start:end]))
+                # logger.info('b_actions:'+str(b_actions))
+                # logger.info('b_actions[mb_inds]:'+str(b_actions[mb_inds]))
                 mb_inds = b_inds[start:end][0]
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
                 _, newlogprob, entropy, newvalue = self.agent.get_action_and_value([b_obs_str], action_list, b_actions[mb_inds], is_warmup, return_value = False)
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
+
                 # logger.info('mb_inds:'+str(mb_inds))
                 # logger.info('b_actions:'+str(b_actions))
                 # logger.info('b_logprobs:'+str(b_logprobs))
+                # logger.info('b_logprobs[mb_inds]:'+str(b_logprobs[mb_inds]))
                 # logger.info('newlogprob:'+str(newlogprob))
+                # logger.info('logratio:'+str(logratio))
+                # logger.info('ratio:'+str(ratio))
+
+                # logratio = newlogprob.item() - b_logprobs[mb_inds].item()
+                # ratio = logratio.exp()
                 # logger.info('logratio:'+str(logratio))
                 # logger.info('ratio:'+str(ratio))
 
@@ -267,14 +312,13 @@ class Policy(nn.Module):
                     total_approx_kl += approx_kl / self.gradient_checkpointing_steps
                     clipfracs += [((ratio - 1.0).abs() > self.clip_coef).float().mean().item()]
 
-
                 mb_advantages = b_advantages[mb_inds]
-                #logger.info('mb_advantages:'+str(mb_advantages))
+                # logger.info('mb_advantages:'+str(mb_advantages))
 
                 if self.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
 
-                #logger.info('mb_advantages:'+str(mb_advantages))
+                # logger.info('mb_advantages:'+str(mb_advantages))
                 # Policy loss
                 pg_loss1 = -mb_advantages * ratio
                 pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - self.clip_coef, 1 + self.clip_coef)
@@ -306,7 +350,12 @@ class Policy(nn.Module):
                     self.policy_optimizer.zero_grad()    
 
             logger.info('Update policy')
+            logger.info('policy_loss  '+str(loss.item()))
+            logger.info('policy_loss  '+str(pg_loss.item()))
 
+        logger.info('old_approx_kl  '+str(old_approx_kl.item()))
+        logger.info('approx_kl  '+str(approx_kl.item()))
+        logger.info('total_approx_kl  '+str(total_approx_kl.item()))
         logger.info('Finish epoch') 
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)
@@ -317,19 +366,20 @@ class Policy(nn.Module):
         else:
             num_clipfracs = np.mean(clipfracs)
 
-        # writer.add_scalar("charts/policy_learning_rate", self.policy_optimizer.param_groups[0]["lr"], step_cnt)
-        # writer.add_scalar("charts/value_learning_rate", self.value_optimizer.param_groups[0]["lr"], step_cnt)
-        # writer.add_scalar("losses/value_loss", v_loss.item(), step_cnt)
-        # writer.add_scalar("losses/policy_loss", pg_loss.item(), step_cnt)
-        # writer.add_scalar("losses/entropy", entropy_loss.item(), step_cnt)
-        # writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), step_cnt)
-        # writer.add_scalar("losses/approx_kl", approx_kl.item(), step_cnt)
-        # writer.add_scalar("losses/total_approx_kl", total_approx_kl.item(), step_cnt)
-        # writer.add_scalar("losses/policy_update_times", policy_update_steps // self.gradient_checkpointing_steps, step_cnt)
-        # writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
-        # writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
+        writer.add_scalar("charts/policy_learning_rate", self.policy_optimizer.param_groups[0]["lr"], step_cnt)
+        writer.add_scalar("charts/value_learning_rate", self.value_optimizer.param_groups[0]["lr"], step_cnt)
+        writer.add_scalar("losses/value_loss", v_loss.item(), step_cnt)
+        writer.add_scalar("losses/policy_loss", pg_loss.item(), step_cnt)
+        writer.add_scalar("losses/entropy", entropy_loss.item(), step_cnt)
+        writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/approx_kl", approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/total_approx_kl", total_approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/policy_update_times", policy_update_steps // self.gradient_checkpointing_steps, step_cnt)
+        writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
+        writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
         
         return step_cnt, rewards, achievement
+
 
         
     

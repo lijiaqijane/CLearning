@@ -5,7 +5,7 @@ import tiktoken
 from langchain.prompts import PromptTemplate
 from llm import AnyOpenAILLM, get_similarity_encoder, get_vectordb
 from policy_llm import LLMAgent
-from prompts import react_agent_prompt, feedback_agent_prompt
+from prompts import actonly_agent_prompt, feedback_agent_prompt
 from fewshots import CRAFTER_SAMPLE,  FEEDBACKS
 from sklearn.metrics.pairwise import cosine_similarity
 import os
@@ -33,7 +33,7 @@ class ReactAgent:
     def __init__(self,
                  task,
                  env,
-                 agent_prompt: PromptTemplate = react_agent_prompt,
+                 agent_prompt: PromptTemplate = actonly_agent_prompt,
                  feedback_prompt: PromptTemplate = feedback_agent_prompt,
                  interact_llm : AnyOpenAILLM = AnyOpenAILLM(),     
                  sim_encoder = get_similarity_encoder(),
@@ -61,11 +61,10 @@ class ReactAgent:
         
         self.wrap_env.previous_observation = obs  ##keep previous obs
 
-        logger.info('------step-----'+action)
+        #logger.info('------step-----'+action)
         action = action.split(':')
         action_type, action_content = action[0].strip(' '), action[1].strip(' ')
         scratchpad += action_type+': '+action_content+'\n'
-
         # execute action = env.step
         if action_type == 'Search':
             docs = []
@@ -95,9 +94,9 @@ class ReactAgent:
 
                 ## if act: 补全2个参数
                 # logger.info('------len(argument)---'+str(len(argument)))
-                # logger.info('------argument[0]---'+str( argument[0] not in list(executable_actions.values()) ))
-                # logger.info('------argument[1]---'+str(int(argument[1]) not in list(executable_actions.keys())))
-                if len(argument) != 2 or argument[0] not in list(executable_actions.values()) or int(argument[1]) not in list(executable_actions.keys()):
+                # logger.info('------argument[0]---'+str( argument[0] not in list(executable_actions.keys()) ))
+                # logger.info('------argument[1]---'+str(int(argument[1]) not in list(executable_actions.values())))
+                if len(argument) != 2 or argument[0] not in list(executable_actions.keys()) or int(argument[1]) not in list(executable_actions.values()):
                     scratchpad += 'Invalid Action! '+'\n'
                     pass
                 else:
@@ -111,13 +110,13 @@ class ReactAgent:
         else:
             scratchpad += 'Invalid Action! '+'\n'
         
-        logger.info('------argument---'+str(argument))
+        #logger.info('------argument---'+str(argument))
 
         logger.info('------action-----'+str(action_list))
         obs, rewards = self.wrap_env.steps(actions_list=action_list)
         if obs not in self.wrap_env.previous_observation:
             scratchpad += 'Observation: '+obs+'\n'
-        logger.info('------scratchpad-----'+str(traj))
+        #logger.info('------scratchpad-----'+str(traj))
 
 
         achievement = self.wrap_env.achievements

@@ -1,7 +1,7 @@
 from langchain.prompts import PromptTemplate
 
 ##Performing steps based solely on the previous scratchpad (thought/action/observation)
-REACT_INSTRUCTION =  """You're a player trying to play the game of Crafter. 
+ACT_INSTRUCTION =  """You're a player trying to play the game of Crafter. 
 Given the player’s current observation, you can only select one action in the list below:
 Act: [Move West, 1], Act: [Move East, 2], Act: [Move North, 3], Act: [Move South, 4],
 Act: [Do, 5], Act: [Sleep, 6], Act: [Place Stone, 7], Act: [Place Table, 8], Act: [Place Furnace, 9],
@@ -64,9 +64,9 @@ Task: {task}
 
 Reflection:"""
 
-react_agent_prompt = PromptTemplate(
+actonly_agent_prompt = PromptTemplate(
     input_variables=["examples", "task", "get_observation"],
-    template=REACT_INSTRUCTION,
+    template=ACT_INSTRUCTION,
 )
 
 react_reflect_agent_prompt = PromptTemplate(
