@@ -1,13 +1,273 @@
-Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.87s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.82s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.82s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.32s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.51s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.45s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:03,  1.99s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.87s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.38s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.62s/it]
 ----------------load model
 trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
 [INFO:minedojo.tasks] Loaded 1572 Programmatic tasks, 1558 Creative tasks, and 1 special task: "Playthrough". Totally 3131 tasks loaded.
-Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.64s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.67s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.63s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.36s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.84s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.92s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.88s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.35s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.55s/it]
 trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
-Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.72s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.74s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.71s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.83s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.84s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.83s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.31s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.50s/it]
 trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
 ---------------------------------
 save model
-Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.46s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.25s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:01,  1.91s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.37s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.65s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.35s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.11s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.86s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.33s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.59s/it]
 trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
-Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.19s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.21s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.17s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.65s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.84s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.58s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.60s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.61s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.34s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.60s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.28s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:01,  1.95s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.39s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.69s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.74s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.73s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.70s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.94s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.64s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:07<00:02,  2.46s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  1.80s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.10s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.12s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.11s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.17s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.63s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.82s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.63s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.26s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.02s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.50s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.77s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.85s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.83s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.93s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.46s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.61s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.42s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.25s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:01,  1.95s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.39s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.67s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.58s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.60s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.63s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.18s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.34s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.63s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.11s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.84s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.30s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.59s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.56s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.65s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.63s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.22s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.37s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.47s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:03,  1.98s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.71s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.21s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.49s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.66s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.93s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:02,  2.00s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.50s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.65s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.90s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.39s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.23s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.65s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.93s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.03s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.13s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.17s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.60s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.79s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.63s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.08s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.77s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.26s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.55s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.13s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.11s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.08s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.57s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.77s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.55s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.03s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.74s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.23s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.52s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.38s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.43s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.42s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.04s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.18s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.90s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.19s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.82s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.29s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.61s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.85s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.71s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.86s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.43s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.57s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.43s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:03,  1.98s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.68s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.20s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.47s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.36s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.40s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.43s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.05s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.18s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.46s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.02s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.71s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.22s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.49s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.95s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.99s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.91s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.45s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.64s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:03<00:09,  3.22s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.50s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:01,  2.00s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.39s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.77s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.35s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.41s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.43s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.06s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.19s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.71s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.33s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.13s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.57s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.84s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.11s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.05s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.05s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.53s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.72s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.43s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:03,  2.00s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.72s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.23s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.50s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:03,  1.29s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.38s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.52s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.11s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.23s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.56s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.09s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.80s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.27s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.56s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.92s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.71s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.63s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.17s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.37s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.81s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.36s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.15s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.67s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.93s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.60s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.69s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.72s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.31s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.45s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.38s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:03,  1.94s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.66s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.18s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.45s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.39s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.42s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.43s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.06s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:04<00:00,  1.19s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.87s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.38s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.22s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.63s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.92s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.03s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:03,  2.00s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.08s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.54s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.73s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.79s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.55s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:07<00:02,  2.41s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  1.75s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.04s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.01s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.17s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.13s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.59s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.78s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.90s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.63s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:07<00:02,  2.22s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.65s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.96s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.88s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.96s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.05s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.53s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.69s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:03<00:09,  3.18s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.78s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:07<00:02,  2.40s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  1.74s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.09s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.25s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.18s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.12s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.58s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.80s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:03<00:09,  3.01s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.56s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:07<00:02,  2.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.66s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.98s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.90s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.95s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.96s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.48s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.65s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.53s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.06s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.77s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.26s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.54s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.64s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.73s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.89s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.43s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.56s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.46s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.02s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.71s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.21s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.49s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.81s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.97s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.98s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.49s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.65s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.56s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.29s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.07s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.54s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.80s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.00s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.16s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.06s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.54s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.74s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.52s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.01s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.70s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.21s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.49s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.53s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.85s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:02,  2.01s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.50s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.63s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.41s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.21s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.04s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.59s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.80s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.54s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.54s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.51s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.10s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.26s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:03<00:09,  3.04s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.73s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:07<00:02,  2.39s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  1.73s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:08<00:00,  2.06s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.21s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.28s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.17s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.60s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.83s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.42s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.07s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.78s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.26s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:06<00:00,  1.54s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.61s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.63s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.58s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.15s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.31s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+---------------------------------
+save model
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:08,  2.99s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:05<00:05,  2.56s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:07<00:02,  2.24s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.70s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.99s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.66s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.64s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.67s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.20s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.37s/it]
+trainable params: 3,407,872 || all params: 8,033,669,120 || trainable%: 0.04241987003816259
+Traceback (most recent call last):
+  File "/scratch/nlp/lijiaqi/CLearning/reflexion/notebooks/Ours.py", line 62, in <module>
+    global_step, rewards, achievement= policy.trainer(task, global_step, frac, writer)
+  File "../ppo_llm_pomdp.py", line 181, in trainer
+    action, logprob, _, value = self.agent.get_action_and_value([self.prompt + '\n'.join(trajectory)], action_list)
+  File "../policy_llm.py", line 238, in get_action_and_value
+    outputs = self.actor(input_ids, attention_mask=attention_mask)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/peft/peft_model.py", line 1129, in forward
+    return self.base_model(
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 161, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/accelerate/hooks.py", line 165, in new_forward
+    output = old_forward(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1208, in forward
+    outputs = self.model(
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/accelerate/hooks.py", line 165, in new_forward
+    output = old_forward(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1018, in forward
+    layer_outputs = decoder_layer(
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/accelerate/hooks.py", line 165, in new_forward
+    output = old_forward(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 756, in forward
+    hidden_states = self.mlp(hidden_states)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/accelerate/hooks.py", line 165, in new_forward
+    output = old_forward(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 240, in forward
+    down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/accelerate/hooks.py", line 165, in new_forward
+    output = old_forward(*args, **kwargs)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/bitsandbytes/nn/modules.py", line 388, in forward
+    out = bnb.matmul(x, self.weight, bias=self.bias, state=self.state)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/bitsandbytes/autograd/_functions.py", line 559, in matmul
+    return MatMul8bitLt.apply(A, B, out, bias, state)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/torch/autograd/function.py", line 539, in apply
+    return super().apply(*args, **kwargs)  # type: ignore[misc]
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/bitsandbytes/autograd/_functions.py", line 323, in forward
+    CA, CAt, SCA, SCAt, coo_tensorA = F.double_quant(A.to(torch.float16), threshold=state.threshold)
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/bitsandbytes/functional.py", line 2005, in double_quant
+    nnz = nnz_row_ptr[-1].item()
+KeyboardInterrupt
+Error in atexit._run_exitfuncs:
+Traceback (most recent call last):
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/site-packages/posthog/client.py", line 400, in join
+    consumer.join()
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/threading.py", line 1029, in join
+    self._wait_for_tstate_lock()
+  File "/home/jiangkailin/miniconda3/envs/jqram/lib/python3.9/threading.py", line 1045, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt

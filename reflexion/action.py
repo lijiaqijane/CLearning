@@ -66,28 +66,29 @@ class ReactAgent:
         action_type, action_content = action[0].strip(' '), action[1].strip(' ')
         scratchpad += action_type+': '+action_content+'\n'
         # execute action = env.step
-        if action_type == 'Search':
-            docs = []
-            context = ''
-            if self.collection.count() > 0:
-                try:
-                    docs = self.retriever.get_relevant_documents(action_content)  
-                    for i in range(len(docs)):
-                        doc_details = docs[i].to_json()['kwargs']
-                        self.title = doc_details['metadata']['title']
-                        logger.info(str(i) + '【'+ self.title+ '】'+'\n')
-                        context += doc_details['page_content']
-                except Exception as e:
-                    logger.info(e)
-            argument = '$Retrieved context$: '+context
-            scratchpad += ' '+ argument+'\n'
-        elif action_type == 'Ask':
-            feedback = self.get_feedback(obs, '\n'.join(traj)+scratchpad)
-            argument = '$Feedback$: '+ feedback
-            scratchpad += ' '+ argument+'\n'
-        elif action_type == 'Thought':
-            argument = ''
-        elif action_type == 'Act':
+        # if action_type == 'Search':
+        #     docs = []
+        #     context = ''
+        #     if self.collection.count() > 0:
+        #         try:
+        #             docs = self.retriever.get_relevant_documents(action_content)  
+        #             for i in range(len(docs)):
+        #                 doc_details = docs[i].to_json()['kwargs']
+        #                 self.title = doc_details['metadata']['title']
+        #                 logger.info(str(i) + '【'+ self.title+ '】'+'\n')
+        #                 context += doc_details['page_content']
+        #         except Exception as e:
+        #             logger.info(e)
+        #     argument = '$Retrieved context$: '+context
+        #     scratchpad += ' '+ argument+'\n'
+        # elif action_type == 'Ask':
+        #     feedback = self.get_feedback(obs, '\n'.join(traj)+scratchpad)
+        #     argument = '$Feedback$: '+ feedback
+        #     scratchpad += ' '+ argument+'\n'
+        # elif action_type == 'Thought':
+        #     argument = ''
+        
+        if action_type == 'Act':
             try:
                 executable_actions = self.wrap_env.get_executable_actions()
                 argument = action_content.split(', ')
@@ -112,10 +113,10 @@ class ReactAgent:
         
         #logger.info('------argument---'+str(argument))
 
-        logger.info('------action-----'+str(action_list))
+        #logger.info('------action-----'+str(action_list))
         obs, rewards = self.wrap_env.steps(actions_list=action_list)
         if obs not in self.wrap_env.previous_observation:
-            scratchpad += 'Observation: '+obs+'\n'
+            scratchpad += obs+'\n'
         #logger.info('------scratchpad-----'+str(traj))
 
 

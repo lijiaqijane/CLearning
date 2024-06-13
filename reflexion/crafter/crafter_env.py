@@ -67,7 +67,7 @@ class WrapEnv:
 
 
     def get_executable_actions(self):
-        return { 'Move West':1, 'Move East':2, 'Move North':3, 'Move South':4,
+        return {'Noop':0, 'Move West':1, 'Move East':2, 'Move North':3, 'Move South':4,
                 'Do':5, 'Sleep':6, 'Place Stone':7,'Place Table':8, 'Place Furnace':9, 'Place Plant':10, 'Make Wood Pickaxe':11,
                 'Make Stone Pickaxe':12, 'Make Iron Pickaxe':13, 'Make Wood Sword':14, 'Make Stone Sword':15,'Make Iron Sword':16}
         # return {1: 'Move West', 2: 'Move East', 3: 'Move North', 4: 'Move South',

@@ -43,9 +43,8 @@ num_steps = 500
 
 writer = SummaryWriter(f"../writer/")
 policy = Policy(max_steps= num_steps, max_obs = 200)  
-global_step, no_q  = 0, 0
 
-for update in range(3, num_updates+1): #num_updates + 1
+for update in range(15, num_updates+1): #num_updates + 1
     logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   
@@ -59,6 +58,7 @@ for update in range(3, num_updates+1): #num_updates + 1
                              'place_stone': 0, 'place_table': 0, 'wake_up': 0}
 
     frac = 1.0 - (update - 1.0) / num_updates
+    global_step = (update-1) * num_steps
     global_step, rewards, achievement= policy.trainer(task, global_step, frac, writer)
 
     if global_step // num_steps > 0 : 
@@ -71,7 +71,7 @@ for update in range(3, num_updates+1): #num_updates + 1
         logger.info('=====curr_ach: {}'.format(achievement))
         pre_achievement = achievement
     logger.info('===========Current_step: {},  =====total_reward: {}'.format(global_step, rewards))
-    no_q += 1
+
 
 
 logger.info('=====Final_ach: {}'.format(achievement))

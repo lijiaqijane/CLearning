@@ -48,8 +48,34 @@ class Policy(nn.Module):
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
         self.resume = True
-        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0002"
+        self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0014"
         self.normalization_mode = "word"
+        self.prompt =  """You are currently in the game "Crafter" through textual APIs. In each turn, you must create an API call message based on the textual observation of what you see and your current status. Your actions will result in rewards or punishments, and your goal is to maximize the total reward.
+        
+The observation will follow the format:
+```
+You see {a list of things you can see}
+
+You face {the thing close to you}
+
+You status: {the detailed status of you}
+
+You have {your inventory}
+```
+
+Your output message MUST strictly adhere to the format:
+
+```
+Act: {instruction}
+```
+It is important that all possible instructions are list below:
+    ["Noop", "Move West", "Move East", "Move South", "Move North", "Do", "Sleep", "Place Stone", "Place Table", "Place Furnace", "Place Plant", "Make Wood Pickaxe", "Make Stone Pickaxe", "Make Iron Pickaxe", "Make Wood Sword", "Make Stone Sword", "Make Iron Sword"]
+
+Your goal is to finish the tasks below as much as possible:
+    ['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond','collect_drink','collect_sapling','defeat_skeleton','defeat_zombie','eat_cow','wake_up']
+
+Below are the history of your recent steps:
+"""
 
 
         random.seed(self.seed)
@@ -83,7 +109,6 @@ class Policy(nn.Module):
         self.steps = torch.zeros((self.num_steps, 1)).to(self.device)
         #self.action_list = ["Thought","Search","Ask"]
         self.candidate_action_num = 1
-        self.scratchpad = ''
 
     def format_action(self, action_list):
         actions = []
@@ -108,7 +133,6 @@ class Policy(nn.Module):
         reagent = ReactAgent(task, env)  
         observation = str(env.steps(['0.Noop'])[0])  
         trajectory = [observation+'\n' ]
-        self.scratchpad = '\n'.join(trajectory)
 
         self.next_done = torch.zeros(1).to(self.device)
         self.next_obs = self.agent.tokenizer(observation, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
@@ -125,9 +149,9 @@ class Policy(nn.Module):
 
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                action_list = ['Noop','Move West',  'Move East', 'Move North', 'Move South',
-                                'Do', 'Sleep', 'Place Stone','Place Table', 'Place Furnace', 'Place Plant', 'Make Wood Pickaxe',
-                                 'Make Stone Pickaxe', 'Make Iron Pickaxe', 'Make Wood Sword','Make Stone Sword','Make Iron Sword']
+                action_list = ['Act: Noop','Act: Move West',  'Act: Move East', 'Act: Move North', 'Act: Move South',
+                                'Act: Do', 'Act: Sleep', 'Act: Place Stone','Act: Place Table', 'Act: Place Furnace', 'Act: Place Plant', 'Act: Make Wood Pickaxe',
+                                'Act: Make Stone Pickaxe', 'Act: Make Iron Pickaxe', 'Act: Make Wood Sword','Act: Make Stone Sword','Act: Make Iron Sword']
                 ##way1: orgin
                 #action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
 
@@ -153,7 +177,8 @@ class Policy(nn.Module):
                 #logger.info('final action_list:'+str(action_list))
 
                 ##way3:  concat prompt + action
-                action, logprob, _, value = self.agent.get_action_and_value([next_obs_str], action_list)
+                #logger.info(self.prompt + '\n'.join(trajectory))
+                action, logprob, _, value = self.agent.get_action_and_value([self.prompt + '\n'.join(trajectory)], action_list)
                 self.values[step] = value.flatten()
                 #logger.info('logprob  '+str(logprob))
             self.actions[step] = action
@@ -164,8 +189,8 @@ class Policy(nn.Module):
 
             executable_actions = env.get_executable_actions()
             executable_action = action_list[action.item()]
-            action_str = 'Act: '+executable_action+', '+str(executable_actions[executable_action])
-            #logger.info('get_action_and_value:'+str(action_str)+'   '+str(value))
+            action_str = executable_action+', '+str(executable_actions[executable_action.split(': ')[1]])
+            logger.info('get_action_and_value:'+str(action_str)+'   '+str(value))
             trajectory, next_obs, reward, achievement, done, ach_subg, preact, preobs = reagent.step(action_str,  trajectory , next_obs_str)
             trajectory = self.cutoff_obs(trajectory)
             logger.info('###########reward: {}, step: {}'.format(reward, step))
@@ -229,6 +254,7 @@ class Policy(nn.Module):
         approx_kl = torch.tensor(0)
         total_approx_kl = torch.tensor(0)
         
+        torch.cuda.empty_cache()
         for epoch in range(self.update_epochs):
             if kl_explode:
                 break
@@ -272,7 +298,7 @@ class Policy(nn.Module):
             
             logger.info('Update value')
             logger.info('value_loss  '+str(loss.item()))
-            logger.info('value_loss  '+str(v_loss.item()))
+            logger.info('v_loss  '+str(v_loss.item()))
 
             self.policy_optimizer.zero_grad()            
             #update policy
@@ -351,7 +377,7 @@ class Policy(nn.Module):
 
             logger.info('Update policy')
             logger.info('policy_loss  '+str(loss.item()))
-            logger.info('policy_loss  '+str(pg_loss.item()))
+            logger.info('pg_loss  '+str(pg_loss.item()))
 
         logger.info('old_approx_kl  '+str(old_approx_kl.item()))
         logger.info('approx_kl  '+str(approx_kl.item()))

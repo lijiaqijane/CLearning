@@ -25,8 +25,6 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.orthogonal_(layer.weight, std)
@@ -70,7 +68,7 @@ class LLMAgent(nn.Module):
             self.base_model,
             torch_dtype=torch.float16,
             load_in_8bit=self.load_8bit,
-            device_map="auto",
+            device_map={'':0},
             cache_dir=os.path.join(root, 'weights/llama')
         )
         #model.gradient_checkpointing_enable()
@@ -107,7 +105,7 @@ class LLMAgent(nn.Module):
                 lora_weights,
                 torch_dtype=torch.float16,
                 load_in_8bit=self.load_8bit,
-                device_map="auto"
+                device_map={'':0}
             )
             for name, param in model.named_parameters():
                 if 'lora' in name:
@@ -136,7 +134,7 @@ class LLMAgent(nn.Module):
             min_new_tokens = 30,
             max_new_tokens = self.max_token,
             temperature= 0.9,
-            device_map="auto")
+            device_map={'':0})
         # llm = HuggingFacePipeline(pipeline=query_pipeline)
 
         sequences = pipeline(
@@ -162,7 +160,7 @@ class LLMAgent(nn.Module):
 #             min_new_tokens = 30,
 #             max_new_tokens = self.max_token,
 #             temperature=0.1,
-#             device_map="cuda")
+#             device_map={'':0})
 #         # llm = HuggingFacePipeline(pipeline=query_pipeline)
 
 #         cand = []
@@ -228,7 +226,6 @@ class LLMAgent(nn.Module):
         sequence = []
         for p, ac in zip(prompt, action_list):
             sequence += [p + " " + a for a in ac]
-
 
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
         input_ids = inputs["input_ids"].to(self.device)
