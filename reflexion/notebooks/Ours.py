@@ -44,7 +44,7 @@ num_steps = 500
 writer = SummaryWriter(f"../writer/")
 policy = Policy(max_steps= num_steps, max_obs = 200)  
 
-for update in range(15, num_updates+1): #num_updates + 1
+for update in range(1, num_updates+1): #num_updates + 1
     logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   

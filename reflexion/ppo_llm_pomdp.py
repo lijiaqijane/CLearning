@@ -37,8 +37,8 @@ class Policy(nn.Module):
         self.value_minibatch_size = int(self.batch_size // (self.value_num_minibatches*0.25))
         self.seed = 1
         self.cuda = True
-        self.policy_learning_rate = 5e-7
-        self.value_learning_rate = 1e-5
+        self.policy_learning_rate = 5e-6
+        self.value_learning_rate = 6e-5 #1e-5
         self.norm_adv = False
         self.clip_coef = 0.2
         self.clip_vloss = True
@@ -47,7 +47,7 @@ class Policy(nn.Module):
         self.max_grad_norm = 0.5
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
-        self.resume = True
+        self.resume = False
         self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0014"
         self.normalization_mode = "word"
         self.prompt =  """You are currently in the game "Crafter" through textual APIs. In each turn, you must create an API call message based on the textual observation of what you see and your current status. Your actions will result in rewards or punishments, and your goal is to maximize the total reward.
@@ -71,11 +71,10 @@ Act: {instruction}
 It is important that all possible instructions are list below:
     ["Noop", "Move West", "Move East", "Move South", "Move North", "Do", "Sleep", "Place Stone", "Place Table", "Place Furnace", "Place Plant", "Make Wood Pickaxe", "Make Stone Pickaxe", "Make Iron Pickaxe", "Make Wood Sword", "Make Stone Sword", "Make Iron Sword"]
 
-Your goal is to finish the tasks below as much as possible:
-    ['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond','collect_drink','collect_sapling','defeat_skeleton','defeat_zombie','eat_cow','wake_up']
-
-Below are the history of your recent steps:
+Your task is to "collect_wood". Below are the history of your recent steps:
 """
+# Your goal is to finish the tasks below as much as possible:
+#     ['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond','collect_drink','collect_sapling','defeat_skeleton','defeat_zombie','eat_cow','wake_up']
 
 
         random.seed(self.seed)

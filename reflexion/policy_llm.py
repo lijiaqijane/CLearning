@@ -133,14 +133,14 @@ class LLMAgent(nn.Module):
             repetition_penalty=1.1,
             min_new_tokens = 30,
             max_new_tokens = self.max_token,
-            temperature= 0.9,
+            temperature= 0.1,
             device_map={'':0})
         # llm = HuggingFacePipeline(pipeline=query_pipeline)
 
         sequences = pipeline(
-            prompt + ' Act: [',
+            prompt,
             do_sample=True,
-            top_k = 30,
+            # top_k = 30,
             #top_p=0.85,
             num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
             eos_token_id=self.tokenizer.eos_token_id,
