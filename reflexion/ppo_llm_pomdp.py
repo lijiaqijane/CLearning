@@ -38,7 +38,7 @@ class Policy(nn.Module):
         self.seed = 1
         self.cuda = True
         self.policy_learning_rate = 5e-6
-        self.value_learning_rate = 6e-5 #1e-5
+        self.value_learning_rate = 1e-5
         self.norm_adv = False
         self.clip_coef = 0.2
         self.clip_vloss = True
@@ -50,32 +50,43 @@ class Policy(nn.Module):
         self.resume = False
         self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0014"
         self.normalization_mode = "word"
-        self.prompt =  """You are currently in the game "Crafter" through textual APIs. In each turn, you must create an API call message based on the textual observation of what you see and your current status. Your actions will result in rewards or punishments, and your goal is to maximize the total reward.
-        
-The observation will follow the format:
-```
-You see {a list of things you can see}
+        self.prompt =  """You are playing a game. Please unlock as many achievements as possible while ensuring your survival. 
+Unlock following achievements < Collect Coal, Collect Diamond, Collect Drink, Collect Iron, Collect Sapling, Collect Stone, Collect Wood, kill Skeleton, kill Zombie, kill Cow, Eat Plant, Make Iron Pickaxe, Make Iron Sword, Make Stone Pickaxe, Make Stone Sword, Make Wood Pickaxe, Make Wood Sword, Place Furnace, Place Plant, Place Stone, Place Table, Wake Up >
 
-You face {the thing close to you}
+Here are the available actions:
+noop; # the player do nothing.
+getToBlock(block_name); # When the block is in the bot's view, move the player to the front of block. E.g., getToBlock('stone') will move the player to the stone block. If the block is in the front of bot, return "success". Otherwise, the player could not arrive at the block, return "failed".
+interactWithBlock; # interact with the block at the bot's front.
+exploreDirection(direction, n); # directs the player to explore in a specified direction about n steps. E.g., exploreDirection('left', 5) will move the player left about 5 steps. The directions include left, right, up, down, up-left, up-right, down-left, down-right.
+sleep; # put the player to sleep.
+place_stone; # place a stone block.
+place_table; # place a crafting table.
+place_furnace; # place a furnace.
+place_plant; # place a plant.
+make_wood_pickaxe; # craft a wood pickaxe.
+make_stone_pickaxe; # craft a stone pickaxe.
+make_iron_pickaxe; # craft an iron pickaxe.
+make_wood_sword; # craft a wood sword.
+make_stone_sword; # craft a stone sword.
+make_iron_sword; # craft an iron sword.
 
-You status: {the detailed status of you}
+I will give the player's in-game observation:
+You are on: ...
+You see (objects with coordinate): ...
+Your inventory (xx/9): ... 
 
-You have {your inventory}
-```
+You should then respond to me with Thought or Action. You must follow the following criteria:
+1) You should act as a mentor and guide me to what to do based on my current progress. Do not ask question and answer with something unmeaningful. 
+2) When you attempt an action and observe no changes in the surrounding blocks or inventory, it indicates that the action has failed. Take into account any obstacles in the vicinity that may be impeding progress, or ensure that the necessary requirements for the task are met. Take a moment to analyze the situation and make any necessary adjustments to your approach.
+3) The next task should not be too hard since you may not have the necessary resources or have learned enough skills to complete it yet.
+4) You may sometimes need to repeat some tasks if you need to collect more resources to complete more difficult tasks. Only repeat tasks if necessary.
+5) You should choose available and feasible action.
 
-Your output message MUST strictly adhere to the format:
+If you respond with Thought, you should only respond in the format: Think: ...
+If you respond with Action, you should only respond in the format: Action: ...
 
-```
-Act: {instruction}
-```
-It is important that all possible instructions are list below:
-    ["Noop", "Move West", "Move East", "Move South", "Move North", "Do", "Sleep", "Place Stone", "Place Table", "Place Furnace", "Place Plant", "Make Wood Pickaxe", "Make Stone Pickaxe", "Make Iron Pickaxe", "Make Wood Sword", "Make Stone Sword", "Make Iron Sword"]
-
-Your task is to "collect_wood". Below are the history of your recent steps:
+Below are the history of your recent steps:
 """
-# Your goal is to finish the tasks below as much as possible:
-#     ['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond','collect_drink','collect_sapling','defeat_skeleton','defeat_zombie','eat_cow','wake_up']
-
 
         random.seed(self.seed)
         np.random.seed(self.seed)
@@ -129,7 +140,7 @@ Your task is to "collect_wood". Below are the history of your recent steps:
         env = crafter_env.WrapEnv(env)
         env.set_task(task)
 
-        reagent = ReactAgent(task, env)  
+        reagent = ReactAgent(task, env, self.agent)  
         observation = str(env.steps(['0.Noop'])[0])  
         trajectory = [observation+'\n' ]
 
@@ -148,9 +159,13 @@ Your task is to "collect_wood". Below are the history of your recent steps:
 
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                action_list = ['Act: Noop','Act: Move West',  'Act: Move East', 'Act: Move North', 'Act: Move South',
-                                'Act: Do', 'Act: Sleep', 'Act: Place Stone','Act: Place Table', 'Act: Place Furnace', 'Act: Place Plant', 'Act: Make Wood Pickaxe',
-                                'Act: Make Stone Pickaxe', 'Act: Make Iron Pickaxe', 'Act: Make Wood Sword','Act: Make Stone Sword','Act: Make Iron Sword']
+                action_list = ['Action: Noop','Action: Move West',  'Action: Move East', 'Action: Move North', 'Action: Move South',
+                                'Action: Do', 'Action: Sleep', 'Action: Place Stone','Action: Place Table', 'Action: Place Furnace', 'Action: Place Plant', 'Action: Make Wood Pickaxe',
+                                'Action: Make Stone Pickaxe', 'Action: Make Iron Pickaxe', 'Action: Make Wood Sword','Action: Make Stone Sword','Action: Make Iron Sword']
+                # action_list = ['Action: noop','Action: getToBlock(block_name)',  'Action: interactWithBlock', 'Action: exploreDirection(direction, n)', 
+                #                 'Action: Sleep', 'Action: Place Stone','Action: Place Table', 'Action: Place Furnace', 'Action: Place Plant', 'Action: Make Wood Pickaxe',
+                #                 'Action: Make Stone Pickaxe', 'Action: Make Iron Pickaxe', 'Action: Make Wood Sword','Action: Make Stone Sword','Action: Make Iron Sword']
+
                 ##way1: orgin
                 #action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
 
@@ -169,7 +184,7 @@ Your task is to "collect_wood". Below are the history of your recent steps:
                 #             break
                 #         trys += 1
                 #     if try_tag is False:
-                #         actionlist = random.sample([ 'Act: ' +value+', '+str(key)  for key,value in executable_actions.items() ], self.candidate_action_num)
+                #         actionlist = random.sample([ 'Action: ' +value+', '+str(key)  for key,value in executable_actions.items() ], self.candidate_action_num)
                 #         action_list.extend(actionlist)
                 #         logger.info('sample action_list:'+str(actionlist))
                 # ###step +1 only valid action

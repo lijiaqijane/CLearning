@@ -33,6 +33,7 @@ class ReactAgent:
     def __init__(self,
                  task,
                  env,
+                 agent,
                  agent_prompt: PromptTemplate = actonly_agent_prompt,
                  feedback_prompt: PromptTemplate = feedback_agent_prompt,
                  interact_llm : AnyOpenAILLM = AnyOpenAILLM(),     
@@ -46,8 +47,7 @@ class ReactAgent:
         self.feedback_examples = FEEDBACKS
         self.interact_llm = interact_llm
         self.feedback_prompt = feedback_prompt
-        self.Agent = LLMAgent()
-        self.llm = LLMAgent().actor
+        self.Agent = agent
         self.retriever = retriever
         self.collection = collection
         self.sim_encoder = sim_encoder
