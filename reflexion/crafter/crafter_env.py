@@ -17,6 +17,9 @@ class WrapEnv:
         self.previous_observation = ''
         self.achieve_subgoal = []
 
+    def reset(self):
+        return self._env.reset()
+
     def set_task(self, task):
         self._env.reset()
         self.taskname = task
