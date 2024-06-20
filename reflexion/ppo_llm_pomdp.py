@@ -6,7 +6,7 @@ from platformdirs import user_pictures_dir
 import torch
 import torch.nn as nn
 import gym
-from reflexion.llama3_format import Dialog, Message
+from reflexion.llama3_formatter import Dialog, Message
 from reflexion.crafter import crafter_env
 import torch.optim as optim
 from policy_llm import LLMAgent
