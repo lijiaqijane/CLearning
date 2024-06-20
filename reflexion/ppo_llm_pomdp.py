@@ -228,7 +228,6 @@ It is important that all possible instructions are list below:
         self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
 
         rewards = 0
-        env_step = 0
         for step in range(0, self.num_steps):
             step_cnt += 1
             self.obs[step] = self.next_obs
@@ -257,7 +256,7 @@ It is important that all possible instructions are list below:
                     "Action: Make Iron Sword",
                 ]
 
-                raw_obs, prompts = self.pack_prompts(trajectory, next_obs_str, env_step)
+                raw_obs, prompts = self.pack_prompts(trajectory, next_obs_str, reagent.step_count)
 
                 # concat prompt + action
                 # logger.info(self.prompt + '\n'.join(trajectory))
@@ -289,7 +288,6 @@ It is important that all possible instructions are list below:
                 ach_subg,
                 preact,
                 preobs,
-                env_step,
             ) = reagent.step(action_str, trajectory, next_obs_str)
 
             trajectory = self.cutoff_traj(trajectory)

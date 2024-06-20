@@ -54,7 +54,7 @@ class WrapEnv:
             self.achievements = info['achievements']
   
         assert len(indexs)==1
-        return decs[0], reward, self._env._step
+        return decs[0], reward
 
     def subgoals_progress(self, all=False):
         if all:

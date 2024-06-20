@@ -52,6 +52,7 @@ class ReactAgent:
         self.previous_observation = []
         self.achieve_subgoal = []
         self.wrap_env = env
+        self.step_count = 0
 
         
     def step(self, action, traj, obs, scratchpad = '', action_list=['0.Noop']):
@@ -75,7 +76,6 @@ class ReactAgent:
                 - achieve_subgoal (list): The list of achieved subgoals.
                 - previous_action (list): The list of previous actions.
                 - previous_observation (str): The previous observation.
-                - step (int): The step number.
         """
         
         self.wrap_env.previous_observation = obs  ##keep previous obs
@@ -133,11 +133,12 @@ class ReactAgent:
         #logger.info('------argument---'+str(argument))
 
         #logger.info('------action-----'+str(action_list))
-        obs, rewards, steps = self.wrap_env.steps(actions_list=action_list)
+        obs, rewards = self.wrap_env.steps(actions_list=action_list)
         if obs not in self.wrap_env.previous_observation:
             scratchpad += obs+'\n'
         #logger.info('------scratchpad-----'+str(traj))
-
+        
+        self.step_count += 1
 
         achievement = self.wrap_env.achievements
         for key in achievement.keys():  #??any goal achieved is OK, not equals to the given task
@@ -150,7 +151,7 @@ class ReactAgent:
                 #break  ##如果加break就是检测到第一个新增subgoal就停止,否则检测所有新增
 
         traj.append(scratchpad)
-        return traj, obs, rewards, self.wrap_env.achievements, self.wrap_env.done, self.achieve_subgoal, self.previous_action, self.previous_observation, steps
+        return traj, obs, rewards, self.wrap_env.achievements, self.wrap_env.done, self.achieve_subgoal, self.previous_action, self.previous_observation
 
     def update_memory(self, subgoals, achieve_subgoal, pre_action, pre_observation):
         logger.info('--------------------------Mem upd----------------------------')

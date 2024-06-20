@@ -62,6 +62,7 @@ class LLMAgent(nn.Module):
             self.actor = self._init_actor().to(self.device)
             self.critic = self._init_critic().to(self.device)
 
+
     def _init_llama(self) -> PreTrainedModel:
         model = AutoModelForCausalLM.from_pretrained(
             self.base_model,
