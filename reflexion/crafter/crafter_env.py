@@ -1,5 +1,4 @@
 import json
-from action import logger
 
 class WrapEnv:
     def __init__(self, env):
