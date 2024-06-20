@@ -56,7 +56,7 @@ class Policy(nn.Module):
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
         self.resume = False
-        self.load_path = f"{os.path.abspath(__file__)}/result"
+        self.load_path = f"{os.path.dirname(__file__)}/result"
         self.normalization_mode = "word"
         self.system_prompt = Message(
             role="system",

@@ -21,7 +21,7 @@ class WrapEnv:
         self._env.reset()
         self.taskname = task
         # output
-        with open(f'{os.path.abspath(__file__)}/subgoals.json', 'r') as file:
+        with open(os.path.join(os.path.dirname(__file__), 'subgoals.json'), 'r') as file:
             subgoals = json.load(file)
         try:
             taskname = type(eval(self.taskname))
