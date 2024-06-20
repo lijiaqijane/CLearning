@@ -96,13 +96,16 @@ It is important that all possible instructions are list below:
 
         if self.resume:
             self.agent = LLMAgent(
+                max_obs=max_obs,
                 normalization_mode=self.normalization_mode,
                 load_path=self.load_path,
                 load_8bit=True,
             )
         else:
             self.agent = LLMAgent(
-                normalization_mode=self.normalization_mode, load_8bit=True
+                max_obs=max_obs,
+                normalization_mode=self.normalization_mode,
+                load_8bit=True,
             )
 
         # logger.info(list(self.agent.actor.parameters()))
@@ -163,16 +166,33 @@ It is important that all possible instructions are list below:
         if self.ALLOW_GOAL:
             # TODO update task list during running?
             task_list = [
-                'place_plant', 'collect_wood', 'place_table', 'make_wood_sword',
-                'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone',
-                'place_stone', 'place_furnace', 'make_stone_sword',
-                'make_stone_pickaxe', 'collect_iron', 'make_iron_sword',
-                'make_iron_pickaxe', 'collect_diamond', 'collect_drink',
-                'collect_sapling', 'defeat_skeleton', 'defeat_zombie', 'eat_cow',
-                'wake_up'
+                "place_plant",
+                "collect_wood",
+                "place_table",
+                "make_wood_sword",
+                "make_wood_pickaxe",
+                "eat_plant",
+                "collect_coal",
+                "collect_stone",
+                "place_stone",
+                "place_furnace",
+                "make_stone_sword",
+                "make_stone_pickaxe",
+                "collect_iron",
+                "make_iron_sword",
+                "make_iron_pickaxe",
+                "collect_diamond",
+                "collect_drink",
+                "collect_sapling",
+                "defeat_skeleton",
+                "defeat_zombie",
+                "eat_cow",
+                "wake_up",
             ]
             task_str = ",".join(task_list)
-            prefix.append(f"""Your goal is to finish the below tasks:\n```[{task_str}]```""")
+            prefix.append(
+                f"""Your goal is to finish the below tasks:\n```[{task_str}]```"""
+            )
 
         if self.ALLOW_TRAJ:
             traj_str = "\n".join(traj)
@@ -191,16 +211,19 @@ It is important that all possible instructions are list below:
 
         prompt_content = obs
         if len(prefix) > 0:
-            prompt_content = "\n".join(prefix) + '\n' + prompt_content
+            prompt_content = "\n".join(prefix) + "\n" + prompt_content
         if len(suffix) > 0:
-            prompt_content = prompt_content + '\n' + "\n".join(suffix)
-        
+            prompt_content = prompt_content + "\n" + "\n".join(suffix)
+
         full_user_prompt = Message(role="user", content=prompt_content)
         obs_user_prompt = Message(role="user", content=obs)
-        return [self.system_prompt, obs_user_prompt], [self.system_prompt, full_user_prompt]
+        return [self.system_prompt, obs_user_prompt], [
+            self.system_prompt,
+            full_user_prompt,
+        ]
 
     def think(self):
-        #TODO
+        # TODO
         pass
 
     def trainer(
@@ -245,12 +268,14 @@ It is important that all possible instructions are list below:
                     "Action: Make Iron Sword",
                 ]
 
-                raw_obs, prompts = self.pack_prompts(trajectory, next_obs_str, reagent.step_count)
+                raw_obs, prompts = self.pack_prompts(
+                    trajectory, next_obs_str, reagent.step_count
+                )
 
                 # concat prompt + action
                 # logger.info(self.prompt + '\n'.join(trajectory))
-                action, logprob, _, value, encoded_prompt, encoded_obs = self.agent.get_action_and_value(
-                    raw_obs, prompts, action_list
+                action, logprob, _, value, encoded_prompt, encoded_obs = (
+                    self.agent.get_action_and_value(raw_obs, prompts, action_list)
                 )
 
                 self.next_obs = encoded_obs

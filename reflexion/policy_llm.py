@@ -29,9 +29,11 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
 class LLMAgent(nn.Module):
     def __init__(
-        self, max_token=100, normalization_mode="token", load_path=None, load_8bit=True
+        self, max_obs, max_token=100, normalization_mode="token", load_path=None, load_8bit=True
     ):
         super().__init__()
+
+        self.obs_length = max_obs
 
         self.load_8bit = load_8bit
         self.base_model = "/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct"  # Meta-Llama-3-8B-Instruct, Llama-2-7b-chat-hf, Llama-2-13b-chat-hf
