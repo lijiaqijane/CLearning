@@ -2,7 +2,6 @@
 import random
 import gym
 import numpy as np
-from platformdirs import user_pictures_dir
 import torch
 import torch.nn as nn
 import gym

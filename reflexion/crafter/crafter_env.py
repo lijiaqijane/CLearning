@@ -1,5 +1,5 @@
 import json
-from action import logger
+from reflexion.action import logger
 
 class WrapEnv:
     def __init__(self, env):

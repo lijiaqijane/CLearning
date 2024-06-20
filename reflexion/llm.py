@@ -1,15 +1,11 @@
-from typing import Union, Literal
-from langchain import OpenAI
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from sentence_transformers import SentenceTransformer
 from langchain_community.vectorstores import Chroma
 import chromadb
-import torch
-from torch import cuda, bfloat16
+from torch import bfloat16
 import transformers
-from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM
 from langchain_community.llms import HuggingFacePipeline
-import openai, os
 from openai import AzureOpenAI
 class AnyOpenAILLM:
     def __init__(self, *args, **kwargs):
