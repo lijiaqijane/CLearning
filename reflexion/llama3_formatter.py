@@ -35,7 +35,8 @@ class ChatFormat:
         return f"{self.sh_id}{message['role']}{self.eh_id}\n\n"
 
     def format_message(self, message: Message) -> str:
-        return f"{self.format_header(message)}{message["content"].strip()}{self.e_id}"
+        content = message["content"].strip()
+        return f"{self.format_header(message)}{content}{self.e_id}"
 
     def format_dialog_prompt(self, dialog: Dialog) -> str:
         messages = ''.join(self.format_message(message) for message in dialog)
