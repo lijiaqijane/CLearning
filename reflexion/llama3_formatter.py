@@ -8,7 +8,7 @@ from typing import (
     Sequence,
     TypedDict,
 )
-from transformers.tokenization_utils import PreTrainedTokenizer
+from transformers.tokenization_utils_fast import PreTrainedTokenizerFast
 
 
 logger = getLogger(__name__)
@@ -190,14 +190,24 @@ Dialog = Sequence[Message]
 
 
 class ChatFormat:
-    def __init__(self, tokenizer: PreTrainedTokenizer):
+    def __init__(self, tokenizer: PreTrainedTokenizerFast):
         self.tokenizer = tokenizer
+        self.sh_id = self.tokenizer.convert_tokens_to_ids("<|start_header_id|>")
+        self.eh_id = self.tokenizer.convert_tokens_to_ids("<|end_header_id|>")
+        self.e_id = self.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+        self.bot_id = self.tokenizer.convert_tokens_to_ids("<|begin_of_text|>")
+        assert (
+            isinstance(self.sh_id, int)
+            and isinstance(self.eh_id, int)
+            and isinstance(self.e_id, int)
+            and isinstance(self.bot_id, int)
+        )
 
     def encode_header(self, message: Message) -> List[int]:
         tokens = []
-        tokens.append(self.tokenizer._convert_token_to_id("<|start_header_id|>"))
+        tokens.append(self.sh_id)
         tokens.extend(self.tokenizer.encode(message["role"], bos=False, eos=False))
-        tokens.append(self.tokenizer._convert_token_to_id("<|end_header_id|>"))
+        tokens.append(self.eh_id)
         tokens.extend(self.tokenizer.encode("\n\n", bos=False, eos=False))
         return tokens
 
@@ -206,12 +216,12 @@ class ChatFormat:
         tokens.extend(
             self.tokenizer.encode(message["content"].strip(), bos=False, eos=False)
         )
-        tokens.append(self.tokenizer._convert_token_to_id("<|eot_id|>"))
+        tokens.append(self.e_id)
         return tokens
 
     def encode_dialog_prompt(self, dialog: Dialog) -> List[int]:
         tokens = []
-        tokens.append(self.tokenizer._convert_token_to_id("<|begin_of_text|>"))
+        tokens.append(self.bot_id)
         for message in dialog:
             tokens.extend(self.encode_message(message))
         # Add the start of an assistant message for the model to complete.
