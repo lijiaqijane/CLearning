@@ -54,7 +54,7 @@ class LLMAgent(nn.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
         self.tokenizer.pad_token_id = (0)
         self.llama = self._init_llama()
-        self.llama_formatter = ChatFormat(LLama3Tokenizer(f'{self.base_model}/tokenizer.json'))
+        self.llama_formatter = ChatFormat(self.tokenizer)
 
         if load_path:
             self.load(load_path)
