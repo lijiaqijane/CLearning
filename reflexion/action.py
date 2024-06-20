@@ -58,6 +58,28 @@ class ReactAgent:
 
         
     def step(self, action, traj, obs, scratchpad = '', action_list=['0.Noop']):
+        """
+        A function that takes in action, trajectory, observation, and scratchpad as inputs.
+
+        Parameters:
+            action (str): The action to be executed.
+            traj (list): The (recent) trajectory of the action.
+            obs (str): The current observation.
+            scratchpad (str, optional): The scratchpad to store information. Defaults to ''.
+            action_list (list, optional): The list of actions. Defaults to ['0.Noop'].
+
+        Returns:
+            tuple: A tuple containing the following values:
+                - traj (list): The updated trajectory.
+                - obs (str): The updated observation.
+                - rewards (float): The rewards received.
+                - achievements (dict): The achieved achievements.
+                - done (bool): The status indicating if the action is done.
+                - achieve_subgoal (list): The list of achieved subgoals.
+                - previous_action (list): The list of previous actions.
+                - previous_observation (str): The previous observation.
+                - step (int): The step number.
+        """
         
         self.wrap_env.previous_observation = obs  ##keep previous obs
 
@@ -114,7 +136,7 @@ class ReactAgent:
         #logger.info('------argument---'+str(argument))
 
         #logger.info('------action-----'+str(action_list))
-        obs, rewards = self.wrap_env.steps(actions_list=action_list)
+        obs, rewards, steps = self.wrap_env.steps(actions_list=action_list)
         if obs not in self.wrap_env.previous_observation:
             scratchpad += obs+'\n'
         #logger.info('------scratchpad-----'+str(traj))
@@ -131,7 +153,7 @@ class ReactAgent:
                 #break  ##如果加break就是检测到第一个新增subgoal就停止,否则检测所有新增
 
         traj.append(scratchpad)
-        return traj, obs, rewards, self.wrap_env.achievements, self.wrap_env.done, self.achieve_subgoal, self.previous_action, self.previous_observation
+        return traj, obs, rewards, self.wrap_env.achievements, self.wrap_env.done, self.achieve_subgoal, self.previous_action, self.previous_observation, steps
 
     def update_memory(self, subgoals, achieve_subgoal, pre_action, pre_observation):
         logger.info('--------------------------Mem upd----------------------------')

@@ -21,7 +21,7 @@ class WrapEnv:
         self._env.reset()
         self.taskname = task
         # output
-        with open('/scratch/nlp/lijiaqi/CLearning/reflexion/crafter/subgoals.json', 'r') as file:
+        with open(f'{__path__}/subgoals.json', 'r') as file:
             subgoals = json.load(file)
         try:
             taskname = type(eval(self.taskname))
@@ -53,7 +53,8 @@ class WrapEnv:
             self.done = done
             self.achievements = info['achievements']
   
-        return decs[0], reward
+        assert len(indexs)==1
+        return decs[0], reward, self._env._step
 
     def subgoals_progress(self, all=False):
         if all:

@@ -1,24 +1,22 @@
 import sys
-import gradio as gr
 import torch
 from peft import (
     LoraConfig,
-    get_peft_model,
-    get_peft_model_state_dict,
-    prepare_model_for_kbit_training,
-    get_peft_config
+    get_peft_model
 )
-from transformers import LlamaForCausalLM, LlamaTokenizer, AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers.modeling_utils import PreTrainedModel
 from peft import PeftModel
-import torch.nn.functional as F
 import os
 import torch.nn as nn
 import numpy as np
 import transformers
-import random
 from critic import Critic
 from torch.distributions.categorical import Categorical
-from langchain_community.llms import HuggingFacePipeline
+
+from reflexion.llama3_formatter import ChatFormat, Dialog, LLama3Tokenizer
+from torch.nn.utils.rnn import pad_sequence
+
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root)
 sys.path.append(
@@ -56,6 +54,7 @@ class LLMAgent(nn.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
         self.tokenizer.pad_token_id = (0)
         self.llama = self._init_llama()
+        self.llama_formatter = ChatFormat(LLama3Tokenizer(self.base_model))
 
         if load_path:
             self.load(load_path)
@@ -63,7 +62,7 @@ class LLMAgent(nn.Module):
             self.actor = self._init_actor().to(self.device)
             self.critic = self._init_critic().to(self.device)
 
-    def _init_llama(self):
+    def _init_llama(self) -> PreTrainedModel:
         model = AutoModelForCausalLM.from_pretrained(
             self.base_model,
             torch_dtype=torch.float16,
@@ -80,7 +79,7 @@ class LLMAgent(nn.Module):
 
         return model
 
-    def _init_actor(self, lora_weights = None):
+    def _init_actor(self, lora_weights = None) -> PeftModel:
         if lora_weights is None:
             config = LoraConfig(
                 r=self.lora_r,
@@ -118,7 +117,7 @@ class LLMAgent(nn.Module):
             
         return model
 
-    def _init_critic(self, critic_weights = None):
+    def _init_critic(self, critic_weights = None) -> Critic:
         critic = Critic(self.actor, self.tokenizer)
         if critic_weights is not None:
             critic.v_head_mlp3.load_state_dict(torch.load(critic_weights, map_location= "cpu")) #!critic.v_head.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
@@ -207,36 +206,36 @@ class LLMAgent(nn.Module):
         self.actor = self._init_actor(lora_weights).to(self.device)
         self.critic = self._init_critic(critic_weights).to(self.device)
     
-    def get_value(self, x): ##x is a list
-            
-        inputs = self.tokenizer(x, return_tensors="pt", padding=True)
-        input_ids = inputs["input_ids"].to(self.device)
-        attention_mask = inputs["attention_mask"]
+    def generate(self, prompt):
+        # Which to use?
+        return self.actor.generate(prompt, assistant_model=self.llama, prompt_lookup_num_tokens = 3)
+        # return self.llama.generate(prompt, prompt_lookup_num_tokens = 3)
+
+    def get_value(self, input_ids): ##x is a list            
+        input_ids = input_ids.to(self.device)
+        attention_mask = (input_ids != 0).long()
         
         with self.actor.disable_adapter():
             value = self.critic(input_ids, attention_mask=attention_mask)
         return value
 
-    def get_action_and_value(self, obs, actions, action=None, is_warmup=False, return_value = True):
+    def get_action_and_value(self, obs: Dialog, prompt: Dialog, actions, action=None, is_warmup=False, return_value = True):
+        prompt_ids =  self.llama_formatter.encode_dialog_prompt(prompt)
+        raw_input_ids = []
+        for act in actions:
+            raw_input_ids.append(prompt_ids + self.tokenizer.encode(act.strip(), bos=False, eos=False))
+        input_ids = pad_sequence(raw_input_ids, batch_first=True, padding_value=0)
+        attention_mask = (input_ids != 0).long()
 
-        prompt = [obs[0]]
-        action_list = [actions]
-        action_num = len(action_list[0])
-
-        sequence = []
-        for p, ac in zip(prompt, action_list):
-            sequence += [p + " " + a for a in ac]
-
-        inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
-        input_ids = inputs["input_ids"].to(self.device)
-        
-        attention_mask = inputs["attention_mask"]
         if is_warmup:
             with torch.no_grad():
                 outputs = self.actor(input_ids, attention_mask=attention_mask)
         else:
             outputs = self.actor(input_ids, attention_mask=attention_mask)
-        
+
+        #???
+        action_list = [actions]
+        action_num = len(action_list[0])
         action_list = [item for sublist in action_list for item in sublist]
         self.action_list_ids = self.tokenizer(action_list, return_tensors="pt", padding=True)
 
@@ -270,8 +269,9 @@ class LLMAgent(nn.Module):
         if action is None:
             action = probs.sample()
 
+        obs_ids = [self.llama_formatter.encode_dialog_prompt(prompt)]
         if return_value:
-            return action, probs.log_prob(action), probs.entropy(), self.get_value(prompt)
+            return action, probs.log_prob(action), probs.entropy(), self.get_value(obs)
         else:
             return action, probs.log_prob(action), probs.entropy(), None
 
