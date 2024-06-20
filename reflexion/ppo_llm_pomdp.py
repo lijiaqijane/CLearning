@@ -159,7 +159,6 @@ It is important that all possible instructions are list below:
 
     def pack_prompts(self, traj, obs, env_step) -> Dialog:
         prefix = []
-        prompt_content = obs
         suffix = []
         if self.ALLOW_GOAL:
             # TODO update task list during running?
@@ -188,8 +187,9 @@ It is important that all possible instructions are list below:
             pass
 
         if self.ALLOW_STEP:
-            prefix.append( f"You have acted {env_step}/500 steps")
+            prefix.append(f"You have acted {env_step}/500 steps")
 
+        prompt_content = obs
         if len(prefix) > 0:
             prompt_content = "\n".join(prefix) + '\n' + prompt_content
         if len(suffix) > 0:
@@ -215,7 +215,7 @@ It is important that all possible instructions are list below:
         env = gym.make("smartplay:Crafter-v0")
         env = crafter_env.WrapEnv(env)
         env.set_task(task)
-        _, next_obs_str = env.reset()
+        next_obs_str = env.reset()
         reagent = ReactAgent(task, env, self.agent)
         rewards = 0
         trajectory = []
