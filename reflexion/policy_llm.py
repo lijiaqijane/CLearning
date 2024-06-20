@@ -148,7 +148,7 @@ class LLMAgent(nn.Module):
         if k_sent <= 1:
             return [sequences[0]['generated_text'].split(prompt)[1].strip('\n').split(']')[0].replace('[','')]
         else:
-            return [i['generated_text'].split(prompt)[1].split('\n')[0] for i in sequences ]
+            return [i['generated_text'].split(prompt)[1].split('\n')[0] for i in sequences]
 
 
 #     def get_model(self, prompt, k_sent=1):
@@ -212,21 +212,28 @@ class LLMAgent(nn.Module):
         return self.actor.generate(prompt, assistant_model=self.llama, prompt_lookup_num_tokens = 3)
         # return self.llama.generate(prompt, prompt_lookup_num_tokens = 3)
 
-    def get_value(self, input_ids): ##x is a list            
-        input_ids = input_ids.to(self.device)
-        attention_mask = (input_ids != 0).long()
+    def get_value(self, x): ##x is a list            
+        inputs = self.tokenizer(x, return_tensors="pt", padding=True)
+        input_ids = inputs["input_ids"].to(self.device)
+        attention_mask = inputs["attention_mask"]
         
         with self.actor.disable_adapter():
             value = self.critic(input_ids, attention_mask=attention_mask)
         return value
 
     def get_action_and_value(self, obs: Dialog, prompt: Dialog, actions, action=None, is_warmup=False, return_value = True):
-        prompt_ids =  self.llama_formatter.encode_dialog_prompt(prompt)
-        raw_input_ids = []
+        prompt_str = self.llama_formatter.format_dialog_prompt(prompt)
+        action_list = [actions]
+        action_num = len(action_list[0])
+
+        sequence = []
         for act in actions:
-            raw_input_ids.append(prompt_ids + self.tokenizer.encode(act.strip(), add_special_tokens=False))
-        input_ids = pad_sequence(raw_input_ids, batch_first=True, padding_value=0)
-        attention_mask = (input_ids != 0).long()
+            sequence += [f'{prompt_str}{act}']
+
+        inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
+        input_ids = inputs["input_ids"].to(self.device)
+
+        attention_mask = inputs["attention_mask"]
 
         if is_warmup:
             with torch.no_grad():
@@ -234,9 +241,6 @@ class LLMAgent(nn.Module):
         else:
             outputs = self.actor(input_ids, attention_mask=attention_mask)
 
-        #???
-        action_list = [actions]
-        action_num = len(action_list[0])
         action_list = [item for sublist in action_list for item in sublist]
         self.action_list_ids = self.tokenizer(action_list, return_tensors="pt", padding=True)
 
@@ -270,9 +274,9 @@ class LLMAgent(nn.Module):
         if action is None:
             action = probs.sample()
 
-        obs_ids = [self.llama_formatter.encode_dialog_prompt(prompt)]
+        obs_str = self.llama_formatter.format_dialog_prompt(prompt)
         if return_value:
-            return action, probs.log_prob(action), probs.entropy(), self.get_value(obs)
+            return action, probs.log_prob(action), probs.entropy(), self.get_value([obs_str])
         else:
             return action, probs.log_prob(action), probs.entropy(), None
 
