@@ -1,4 +1,5 @@
 # docs and experiment results can be found at https://docs.cleanrl.dev/rl-algorithms/ppo/#ppopy
+import os
 import random
 import gym
 import numpy as np
@@ -55,7 +56,7 @@ class Policy(nn.Module):
         self.target_kl = None
         self.gradient_checkpointing_steps = 8
         self.resume = False
-        self.load_path = f"{__path__}/result"
+        self.load_path = f"{os.path.abspath(__file__)}/result"
         self.normalization_mode = "word"
         self.system_prompt = Message(
             role="system",

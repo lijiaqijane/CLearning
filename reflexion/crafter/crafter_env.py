@@ -1,4 +1,5 @@
 import json
+import os
 
 class WrapEnv:
     def __init__(self, env):
@@ -20,7 +21,7 @@ class WrapEnv:
         self._env.reset()
         self.taskname = task
         # output
-        with open(f'{__path__}/subgoals.json', 'r') as file:
+        with open(f'{os.path.abspath(__file__)}/subgoals.json', 'r') as file:
             subgoals = json.load(file)
         try:
             taskname = type(eval(self.taskname))
