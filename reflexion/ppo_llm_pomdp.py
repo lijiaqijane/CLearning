@@ -206,32 +206,22 @@ It is important that all possible instructions are list below:
     def trainer(
         self, task, step_cnt, frac, writer, is_warmup=False
     ):  ##？？做对提前结束
+        self.next_done = torch.zeros(1).to(self.device)
+
+        self.policy_optimizer.param_groups[0]["lr"] = frac * self.policy_learning_rate
+        self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
 
         # prepare craft env
         env = gym.make("smartplay:Crafter-v0")
         env = crafter_env.WrapEnv(env)
         env.set_task(task)
-
+        _, next_obs_str = env.reset()
         reagent = ReactAgent(task, env, self.agent)
-        observation = str(env.steps(["0.Noop"])[0])
-        trajectory = [observation + "\n"]
-
-        self.next_done = torch.zeros(1).to(self.device)
-        self.next_obs = self.agent.tokenizer(
-            observation,
-            return_tensors="pt",
-            padding="max_length",
-            max_length=self.obs_length,
-        )["input_ids"].to(self.device)
-
-        self.policy_optimizer.param_groups[0]["lr"] = frac * self.policy_learning_rate
-        self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
-
         rewards = 0
+        trajectory = []
+
         for step in range(0, self.num_steps):
             step_cnt += 1
-            self.obs[step] = self.next_obs
-            self.dones[step] = self.next_done
 
             with torch.no_grad():
 
@@ -260,11 +250,17 @@ It is important that all possible instructions are list below:
 
                 # concat prompt + action
                 # logger.info(self.prompt + '\n'.join(trajectory))
-                action, logprob, _, value = self.agent.get_action_and_value(
+                action, logprob, _, value, encoded_prompt, encoded_obs = self.agent.get_action_and_value(
                     raw_obs, prompts, action_list
                 )
+
+                self.next_obs = encoded_obs
                 self.values[step] = value.flatten()
                 # logger.info('logprob  '+str(logprob))
+
+            # store step
+            self.obs[step] = self.next_obs
+            self.dones[step] = self.next_done
             self.actions[step] = action
             self.logprobs[step] = logprob
 
@@ -296,15 +292,7 @@ It is important that all possible instructions are list below:
             rewards += reward
 
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1)  ##??
-            self.next_obs = self.agent.tokenizer(
-                next_obs,
-                return_tensors="pt",
-                padding="max_length",
-                max_length=self.obs_length,
-            )["input_ids"].to(self.device)
-            self.next_obs, next_done = torch.Tensor(self.next_obs).to(
-                self.device
-            ), torch.Tensor([done]).to(self.device)
+            next_done = torch.Tensor([done]).to(self.device)
             self.steps[step] = torch.Tensor(action).to(
                 self.device
             )  ##?? item['macro_action_steps'] for item in info
@@ -365,6 +353,7 @@ It is important that all possible instructions are list below:
         total_approx_kl = torch.tensor(0)
 
         torch.cuda.empty_cache()
+
         for epoch in range(self.update_epochs):
             if kl_explode:
                 break
@@ -432,7 +421,7 @@ It is important that all possible instructions are list below:
                     action_list,
                     b_actions[mb_inds],
                     is_warmup,
-                    return_value=False,
+                    return_value_and_info=False,
                 )
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
