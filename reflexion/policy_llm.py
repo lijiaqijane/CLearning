@@ -11,7 +11,7 @@ import os
 import torch.nn as nn
 import numpy as np
 import transformers
-from critic import Critic
+from reflexion.critic import Critic
 from torch.distributions.categorical import Categorical
 
 from reflexion.llama3_formatter import ChatFormat, Dialog, LLama3Tokenizer

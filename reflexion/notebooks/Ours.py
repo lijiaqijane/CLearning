@@ -13,9 +13,9 @@ from datasets import load_dataset
 import random
 import os
 from torch.utils.tensorboard import SummaryWriter
-from action import ReactAgent, logger
+from reflexion.action import ReactAgent, logger
 from transformers import  AutoTokenizer
-from ppo_llm_pomdp import Policy
+from reflexion.ppo_llm_pomdp import Policy
 
 def get_max_obslen(ds):
     tokenizer = AutoTokenizer.from_pretrained('/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct') #Meta-Llama-3-8B-Instruct, Llama-2-13b-chat-hf
