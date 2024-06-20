@@ -8,7 +8,7 @@ import torch.nn as nn
 import gym
 import torch.optim as optim
 
-from .llama3_formatter import Dialog, Message
+from .llama3_formatter import ChatFormat, Dialog, Message
 from .crafter import crafter_env
 from .policy_llm import LLMAgent
 from .action import ReactAgent, logger
@@ -57,6 +57,7 @@ class Policy(nn.Module):
         self.gradient_checkpointing_steps = 8
         self.resume = False
         self.load_path = f"{os.path.dirname(__file__)}/result"
+        self.llama_formatter = ChatFormat()
         self.normalization_mode = "word"
         self.system_prompt = Message(
             role="system",
@@ -160,7 +161,8 @@ It is important that all possible instructions are list below:
             traj.pop(0)
         return traj
 
-    def pack_prompts(self, traj, obs, env_step) -> Dialog:
+    # !!! this prompts = obs, don't add thought here !!!
+    def pack_prompts(self, traj, obs, env_step) -> str:
         prefix = []
         suffix = []
         if self.ALLOW_GOAL:
@@ -198,9 +200,9 @@ It is important that all possible instructions are list below:
             traj_str = "\n".join(traj)
             prefix.append(f"""The recent history of your actions:\n```{traj_str}```""")
 
-        if self.ALLOW_REFLECT:
-            # TODO you got a positive/negative reward ...
-            pass
+        # if self.ALLOW_REFLECT:
+        #     # TODO you got a positive/negative reward ...
+        #     pass
 
         if self.ALLOW_RECORD:
             # TODO you have finished ...
@@ -216,11 +218,14 @@ It is important that all possible instructions are list below:
             prompt_content = prompt_content + "\n" + "\n".join(suffix)
 
         full_user_prompt = Message(role="user", content=prompt_content)
-        obs_user_prompt = Message(role="user", content=obs)
-        return [self.system_prompt, obs_user_prompt], [
-            self.system_prompt,
-            full_user_prompt,
-        ]
+        # obs_user_prompt = Message(role="user", content=obs)
+
+        return self.llama_formatter.format_dialog_prompt(
+            [
+                self.system_prompt,
+                full_user_prompt,
+            ]
+        )
 
     def think(self):
         # TODO
@@ -268,17 +273,17 @@ It is important that all possible instructions are list below:
                     "Action: Make Iron Sword",
                 ]
 
-                raw_obs, prompts = self.pack_prompts(
+                prompt_str = self.pack_prompts(
                     trajectory, next_obs_str, reagent.step_count
                 )
 
                 # concat prompt + action
                 # logger.info(self.prompt + '\n'.join(trajectory))
-                action, logprob, _, value, encoded_prompt, encoded_obs = (
-                    self.agent.get_action_and_value(raw_obs, prompts, action_list)
+                action, logprob, _, value, encoded_prompt = (
+                    self.agent.get_action_and_value(prompt_str, action_list)
                 )
 
-                self.next_obs = encoded_obs
+                self.next_obs = encoded_prompt
                 self.values[step] = value.flatten()
                 # logger.info('logprob  '+str(logprob))
 
@@ -441,7 +446,7 @@ It is important that all possible instructions are list below:
                 mb_inds = b_inds[start:end][0]
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
                 _, newlogprob, entropy, newvalue = self.agent.get_action_and_value(
-                    [b_obs_str],
+                    b_obs_str,
                     action_list,
                     b_actions[mb_inds],
                     is_warmup,

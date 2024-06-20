@@ -42,7 +42,7 @@ num_updates = 1000   ##??最大步数
 num_steps = 500
 
 writer = SummaryWriter(f"../writer/")
-policy = Policy(max_steps= num_steps, max_obs = 1000)  
+policy = Policy(max_steps= num_steps, max_obs = 1000)
 
 for update in range(1, num_updates+1): #num_updates + 1
     logger.info('===========Current train update: '+str(update))

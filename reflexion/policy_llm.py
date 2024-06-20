@@ -59,7 +59,6 @@ class LLMAgent(nn.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
         self.tokenizer.pad_token_id = 0
         self.llama = self._init_llama()
-        self.llama_formatter = ChatFormat()
 
         if load_path:
             self.load(load_path)
@@ -238,20 +237,21 @@ class LLMAgent(nn.Module):
 
     def get_action_and_value(
         self,
-        obs: Dialog,
-        prompt: Dialog,
+        # obs: Dialog,
+        prompt_str: str,
         actions,
         action=None,
         is_warmup=False,
         return_value_and_info=True,
+        need_encode=True
     ):
-        prompt_str = self.llama_formatter.format_dialog_prompt(prompt)
         action_list = [actions]
         action_num = len(action_list[0])
 
         sequence = []
         for act in actions:
             sequence += [f"{prompt_str}{act}"]
+
 
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
         input_ids = inputs["input_ids"].to(self.device)
@@ -308,16 +308,10 @@ class LLMAgent(nn.Module):
         if action is None:
             action = probs.sample()
 
-        obs_str = self.llama_formatter.format_dialog_prompt(prompt)
+        # obs_str = self.llama_formatter.format_dialog_prompt(prompt)
         if return_value_and_info:
             prompt_tensor = self.tokenizer(
                 prompt_str,
-                return_tensors="pt",
-                padding="max_length",
-                max_length=self.obs_length,
-            )["input_ids"].to(self.device)
-            obs_tensor = self.tokenizer(
-                obs_str,
                 return_tensors="pt",
                 padding="max_length",
                 max_length=self.obs_length,
@@ -326,9 +320,8 @@ class LLMAgent(nn.Module):
                 action,
                 probs.log_prob(action),
                 probs.entropy(),
-                self.get_value([obs_str]),
-                prompt_tensor,
-                obs_tensor,
+                self.get_value([prompt_str]),
+                prompt_tensor
             )
         else:
             return action, probs.log_prob(action), probs.entropy(), None
