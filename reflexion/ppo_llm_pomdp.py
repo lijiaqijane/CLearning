@@ -225,7 +225,6 @@ It is important that all possible instructions are list below:
 
             with torch.no_grad():
 
-                next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
                 action_list = [
                     "Action: Noop",
                     "Action: Move West",
@@ -277,7 +276,7 @@ It is important that all possible instructions are list below:
             logger.info("get_action_and_value:" + str(action_str) + "   " + str(value))
             (
                 trajectory,
-                next_obs,
+                next_obs_str,
                 reward,
                 achievement,
                 done,
