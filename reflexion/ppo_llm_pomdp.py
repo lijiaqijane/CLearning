@@ -5,11 +5,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 import gym
-from reflexion.llama3_formatter import Dialog, Message
-from reflexion.crafter import crafter_env
 import torch.optim as optim
-from policy_llm import LLMAgent
-from action import ReactAgent, logger
+
+from .llama3_formatter import Dialog, Message
+from .crafter import crafter_env
+from .policy_llm import LLMAgent
+from .action import ReactAgent, logger
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):

@@ -11,11 +11,11 @@ import os
 import torch.nn as nn
 import numpy as np
 import transformers
-from reflexion.critic import Critic
 from torch.distributions.categorical import Categorical
-
-from reflexion.llama3_formatter import ChatFormat, Dialog, LLama3Tokenizer
 from torch.nn.utils.rnn import pad_sequence
+
+from .llama3_formatter import ChatFormat, Dialog, LLama3Tokenizer
+from .critic import Critic
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root)

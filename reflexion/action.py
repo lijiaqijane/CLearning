@@ -1,14 +1,16 @@
 import re, os
 from langchain.prompts import PromptTemplate
-from reflexion.llm import AnyOpenAILLM, get_similarity_encoder, get_vectordb
-from reflexion.prompts import actonly_agent_prompt, feedback_agent_prompt
-from reflexion.fewshots import CRAFTER_SAMPLE,  FEEDBACKS
 from sklearn.metrics.pairwise import cosine_similarity
 import os
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import torch._dynamo
-torch._dynamo.config.suppress_errors = True
 import logging
+
+from .llm import AnyOpenAILLM, get_similarity_encoder, get_vectordb
+from .prompts import actonly_agent_prompt, feedback_agent_prompt
+from .fewshots import CRAFTER_SAMPLE,  FEEDBACKS
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+torch._dynamo.config.suppress_errors = True
 logger = logging.getLogger()
 logger.setLevel('INFO')
 formatter = logging.Formatter()
