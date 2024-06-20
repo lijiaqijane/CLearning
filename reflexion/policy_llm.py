@@ -14,7 +14,7 @@ import transformers
 from torch.distributions.categorical import Categorical
 from torch.nn.utils.rnn import pad_sequence
 
-from .llama3_formatter import ChatFormat, Dialog, LLama3Tokenizer
+from .llama3_formatter import ChatFormat, Dialog
 from .critic import Critic
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
