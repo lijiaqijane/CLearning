@@ -224,7 +224,7 @@ class LLMAgent(nn.Module):
         prompt_ids =  self.llama_formatter.encode_dialog_prompt(prompt)
         raw_input_ids = []
         for act in actions:
-            raw_input_ids.append(prompt_ids + self.tokenizer.encode(act.strip(), bos=False, eos=False))
+            raw_input_ids.append(prompt_ids + self.tokenizer.encode(act.strip(), add_special_tokens=False))
         input_ids = pad_sequence(raw_input_ids, batch_first=True, padding_value=0)
         attention_mask = (input_ids != 0).long()
 
