@@ -44,7 +44,7 @@ class Policy(nn.Module):
             self.batch_size // (self.value_num_minibatches * 0.25)
         )
         self.seed = 1
-        self.cuda = True
+        # self.cuda = True
         self.policy_learning_rate = 5e-6
         self.value_learning_rate = 1e-5
         self.norm_adv = False
@@ -118,7 +118,7 @@ It is important that all possible instructions are list below:
         if self.resume:
             self.agent = LLMAgent(
                 max_obs=max_obs,
-                action_list=action_list,
+                action_list=self.action_list,
                 normalization_mode=self.normalization_mode,
                 load_path=self.load_path,
                 load_8bit=True,
@@ -126,7 +126,7 @@ It is important that all possible instructions are list below:
         else:
             self.agent = LLMAgent(
                 max_obs=max_obs,
-                action_list=action_list,
+                action_list=self.action_list,
                 normalization_mode=self.normalization_mode,
                 load_8bit=True,
             )
