@@ -34,9 +34,9 @@ class ReactAgent:
                  agent_prompt: PromptTemplate = actonly_agent_prompt,
                  feedback_prompt: PromptTemplate = feedback_agent_prompt,
                  interact_llm : AnyOpenAILLM = AnyOpenAILLM(),     
-                 sim_encoder = get_similarity_encoder(),
-                 retriever = get_vectordb()[0],
-                 collection = get_vectordb()[1]
+                 sim_encoder = None,#get_similarity_encoder(),
+                 retriever = None,#get_vectordb()[0],
+                 collection = None,#get_vectordb()[1]
                  ) -> None:
         self.task = task
         self.agent_prompt = agent_prompt
