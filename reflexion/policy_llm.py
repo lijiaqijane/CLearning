@@ -31,6 +31,7 @@ class LLMAgent(nn.Module):
     def __init__(
         self,
         max_obs,
+        action_list,
         max_token=100,
         normalization_mode="token",
         load_path=None,
@@ -71,11 +72,22 @@ class LLMAgent(nn.Module):
             self.actor = self._init_actor().to(self.device)
             self.critic = self._init_critic().to(self.device)
 
+        self.action_list = action_list
+        action_list_ids = self.tokenizer(
+            self.action_list, return_tensors="pt", padding=True
+        )
+        self.action_list_length = (
+            torch.sum(action_list_ids["attention_mask"], dim=-1) - 1
+        ).to(self.device)
+        self.action_word_num = torch.tensor(
+            [len(action.split()) for action in self.action_list]
+        ).to(self.device)
+
+
     def _init_llama(self) -> PreTrainedModel:
         model = AutoModelForCausalLM.from_pretrained(
             self.base_model,
             torch_dtype=torch.float16,
-            load_in_8bit=self.load_8bit,
             device_map={"": 0},
             cache_dir=os.path.join(root, "weights/llama"),
         )
@@ -113,7 +125,6 @@ class LLMAgent(nn.Module):
                 self.llama,
                 lora_weights,
                 torch_dtype=torch.float16,
-                load_in_8bit=self.load_8bit,
                 device_map={"": 0},
             )
             for name, param in model.named_parameters():
@@ -121,6 +132,13 @@ class LLMAgent(nn.Module):
                     param.requires_grad = True
             model.print_trainable_parameters()
             # print("loadpeft_savedmodels")
+
+        if not self.load_8bit:
+            model.half().to(self.device)
+        else:
+            model = prepare_model_for_kbit_training(
+                model, use_gradient_checkpointing=True
+            )
 
         if torch.__version__ >= "2" and sys.platform != "win32":
             model = torch.compile(model, dynamic=True)
@@ -135,6 +153,7 @@ class LLMAgent(nn.Module):
             )  #!critic.v_head.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
         return critic
 
+    @DeprecationWarning
     def get_model(self, prompt, k_sent=1):
         pipeline = transformers.pipeline(
             "text-generation",
@@ -168,42 +187,6 @@ class LLMAgent(nn.Module):
             return [
                 i["generated_text"].split(prompt)[1].split("\n")[0] for i in sequences
             ]
-
-    #     def get_model(self, prompt, k_sent=1):
-    #         pipeline = transformers.pipeline(
-    #             "text-generation",
-    #             model=self.actor,
-    #             tokenizer=self.tokenizer,
-    #             repetition_penalty=1.1,
-    #             min_new_tokens = 30,
-    #             max_new_tokens = self.max_token,
-    #             temperature=0.1,
-    #             device_map={'':0})
-    #         # llm = HuggingFacePipeline(pipeline=query_pipeline)
-
-    #         cand = []
-    #         for i in [' Thought: ',' Ask: ',' Search: ',' Act: ']:
-    #             if i !=' Act: ':
-    #                 prompt += i
-    #                 sequences = pipeline(
-    #                     prompt,
-    #                     do_sample=True,
-    #                     top_k = 1,
-    #                     #top_p=0.85,
-    #                     num_return_sequences= k_sent,  #https://zhuanlan.zhihu.com/p/643949567, https://zhuanlan.zhihu.com/p/653926703
-    #                     eos_token_id=self.tokenizer.eos_token_id,
-    #                 )
-    #                 cand.append(i+sequences[0]['generated_text'].split(prompt)[1].split('\n')[0])
-    #             else:
-    #                 act_list = ["0. Noop: Always applicable.","1. Move West: Flat ground west of the agent.","2. Move East: Flat ground east of the agent.",\
-    # "3. Move North: Flat ground north of the agent.","4. Move South: Flat ground south of the agent.","5. Do: Facing creature or material; have necessary tool.",\
-    # "6. Sleep: Energy level is below maximum.","7. Place Stone: Stone in inventory.","8. Place Table: Wood in inventory.","9. Place Furnace: Stone in inventory.",\
-    # "10. Place Plant: Sapling in inventory.","11. Make Wood Pickaxe: Nearby table; wood in inventory.","12. Make Stone Pickaxe: Nearby table; wood, stone in inventory.",\
-    # "13. Make Iron Pickaxe: Nearby table, furnace; wood, coal, iron an inventory.","14. Make Wood Sword: Nearby table; wood in inventory.",\
-    # "15. Make Stone Sword: Nearby table; wood, stone in inventory.","16. Make Iron Sword: Nearby table, furnace; wood, coal, iron in inventory."]
-    #                 no_seed = random.randint(0,len(act_list))
-    #                 cand.append(i+ act_list[no_seed].split('.')[1].split(':')[0] +',' + act_list[no_seed].split('.')[0])
-    #         return cand
 
     def save(self, epoch, exp_path):
         print("save model")
@@ -246,42 +229,20 @@ class LLMAgent(nn.Module):
         self,
         # obs: Dialog,
         prompt_str: str,
-        actions,
         action=None,
         is_warmup=False,
         return_value_and_info=True,
     ):
-        action_list = [actions]
-        action_num = len(action_list[0])
-
-        sequence = []
-        for act in actions:
-            sequence += [f"{prompt_str}{act}"]
-
+        sequence = [f"{prompt_str}{act}" for act in self.action_list]
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
         input_ids = inputs["input_ids"].to(self.device)
-
         attention_mask = inputs["attention_mask"]
-
-        if is_warmup:
-            with torch.no_grad():
-                outputs = self.actor(input_ids, attention_mask=attention_mask)
-        else:
+        
+        with torch.no_grad() if is_warmup else torch.enable_grad():
             outputs = self.actor(input_ids, attention_mask=attention_mask)
 
-        action_list = [item for sublist in action_list for item in sublist]
-        self.action_list_ids = self.tokenizer(
-            action_list, return_tensors="pt", padding=True
-        )
-
-        self.action_list_length = (
-            torch.sum(self.action_list_ids["attention_mask"], dim=-1) - 1
-        )  # delete first token
         sequence_length = torch.sum(attention_mask, dim=-1)
-        action_index = [
-            [end - start, end]
-            for start, end in zip(self.action_list_length, sequence_length)
-        ]
+        action_index = [[end - start, end] for start, end in zip(self.action_list_length, sequence_length)]
 
         # maybe no need to use it, directly use logits
         logits = torch.log_softmax(outputs.logits, dim=-1)
@@ -294,19 +255,16 @@ class LLMAgent(nn.Module):
             gen_logits[i, start - 1 : end - 1]
             for i, (start, end) in enumerate(action_index)
         ]
-
         action_logits = torch.stack([torch.sum(s) for s in slices])
+
         if self.normalization_mode == "token":
             action_logits = action_logits / self.action_list_length.to(self.device)
         elif self.normalization_mode == "word":
-            action_word_num = torch.tensor(
-                [len(action.split()) for action in action_list]
-            ).to(self.device)
-            action_logits = action_logits / action_word_num
+            action_logits = action_logits / self.action_word_num
         elif self.normalization_mode == "sum":
             action_logits = action_logits
 
-        action_logits = action_logits.reshape(-1, action_num).float()
+        action_logits = action_logits.reshape(-1, len(self.action_list)).float()
 
         probs = Categorical(logits=action_logits)
 

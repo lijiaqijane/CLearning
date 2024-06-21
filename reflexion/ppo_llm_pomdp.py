@@ -95,9 +95,30 @@ It is important that all possible instructions are list below:
             "cuda" if torch.cuda.is_available() and self.cuda else "cpu"
         )
 
+        self.action_list = [
+            "Action: Noop",
+            "Action: Move West",
+            "Action: Move East",
+            "Action: Move North",
+            "Action: Move South",
+            "Action: Do",
+            "Action: Sleep",
+            "Action: Place Stone",
+            "Action: Place Table",
+            "Action: Place Furnace",
+            "Action: Place Plant",
+            "Action: Make Wood Pickaxe",
+            "Action: Make Stone Pickaxe",
+            "Action: Make Iron Pickaxe",
+            "Action: Make Wood Sword",
+            "Action: Make Stone Sword",
+            "Action: Make Iron Sword",
+        ]
+
         if self.resume:
             self.agent = LLMAgent(
                 max_obs=max_obs,
+                action_list=action_list,
                 normalization_mode=self.normalization_mode,
                 load_path=self.load_path,
                 load_8bit=True,
@@ -105,6 +126,7 @@ It is important that all possible instructions are list below:
         else:
             self.agent = LLMAgent(
                 max_obs=max_obs,
+                action_list=action_list,
                 normalization_mode=self.normalization_mode,
                 load_8bit=True,
             )
@@ -252,27 +274,6 @@ It is important that all possible instructions are list below:
             step_cnt += 1
 
             with torch.no_grad():
-
-                action_list = [
-                    "Action: Noop",
-                    "Action: Move West",
-                    "Action: Move East",
-                    "Action: Move North",
-                    "Action: Move South",
-                    "Action: Do",
-                    "Action: Sleep",
-                    "Action: Place Stone",
-                    "Action: Place Table",
-                    "Action: Place Furnace",
-                    "Action: Place Plant",
-                    "Action: Make Wood Pickaxe",
-                    "Action: Make Stone Pickaxe",
-                    "Action: Make Iron Pickaxe",
-                    "Action: Make Wood Sword",
-                    "Action: Make Stone Sword",
-                    "Action: Make Iron Sword",
-                ]
-
                 prompt_str = self.pack_prompts(
                     trajectory, next_obs_str, reagent.step_count
                 )
@@ -280,7 +281,7 @@ It is important that all possible instructions are list below:
                 # concat prompt + action
                 # logger.info(self.prompt + '\n'.join(trajectory))
                 action, logprob, _, value, encoded_prompt = (
-                    self.agent.get_action_and_value(prompt_str, action_list)
+                    self.agent.get_action_and_value(prompt_str)
                 )
 
                 self.next_obs = encoded_prompt
@@ -297,7 +298,7 @@ It is important that all possible instructions are list below:
             # action_str = action_list[action.item()]
 
             executable_actions = env.get_executable_actions()
-            executable_action = action_list[action.item()]
+            executable_action = self.action_list[action.item()]
             action_str = (
                 executable_action
                 + ", "
@@ -322,9 +323,8 @@ It is important that all possible instructions are list below:
 
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1)  ##??
             next_done = torch.Tensor([done]).to(self.device)
-            self.steps[step] = torch.Tensor(action).to(
-                self.device
-            )  ##?? item['macro_action_steps'] for item in info
+            self.steps[step] = torch.Tensor(action).to(self.device)
+            ##?? item['macro_action_steps'] for item in info
 
         # memory update
         # reagent.update_memory(env.subgoal, ach_subg, preact, preobs)
@@ -437,6 +437,7 @@ It is important that all possible instructions are list below:
                 if policy_update_steps % self.gradient_checkpointing_steps == 0:
                     total_approx_kl = 0
                 policy_update_steps += 1
+
                 end = start + self.policy_minibatch_size
                 # logger.info('start:'+str(start))
                 # logger.info('end:'+str(end))
@@ -447,7 +448,6 @@ It is important that all possible instructions are list below:
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
                 _, newlogprob, entropy, newvalue = self.agent.get_action_and_value(
                     b_obs_str,
-                    action_list,
                     b_actions[mb_inds],
                     is_warmup,
                     return_value_and_info=False,
