@@ -25,6 +25,8 @@ class Critic(nn.Module):
         for param in self.parameters():
             param.requires_grad = True
 
+        return self
+
     def gradient_checkpointing_enable(self):
         self.rwtranrsformer.gradient_checkpointing_enable()
 
