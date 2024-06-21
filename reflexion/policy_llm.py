@@ -155,7 +155,7 @@ class LLMAgent(nn.Module):
             critic.v_head_mlp3.load_state_dict(
                 torch.load(critic_weights, map_location="cuda")
             )
-            return critic
+        return critic
 
     @DeprecationWarning
     def get_model(self, prompt, k_sent=1):
