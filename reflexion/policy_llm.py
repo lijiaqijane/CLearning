@@ -1,6 +1,6 @@
 import sys
 import torch
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.modeling_utils import PreTrainedModel
 from peft import PeftModel
@@ -75,10 +75,10 @@ class LLMAgent(nn.Module):
             cache_dir=os.path.join(root, "weights/llama"),
         )
         # model.gradient_checkpointing_enable()
-        # if not self.load_8bit:
-        model.half().to(self.device)
-        # else:
-        #     model = prepare_model_for_kbit_training(model) #, use_gradient_checkpointing=True
+        if not self.load_8bit:
+            model.half().to(self.device)
+        else:
+            model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
 
         return model
 
