@@ -76,7 +76,7 @@ class LLMAgent(nn.Module):
         )
         # model.gradient_checkpointing_enable()
         # if not self.load_8bit:
-        #     model.half().to(self.device)
+        model.half().to(self.device)
         # else:
         #     model = prepare_model_for_kbit_training(model) #, use_gradient_checkpointing=True
 
@@ -115,8 +115,8 @@ class LLMAgent(nn.Module):
             model.print_trainable_parameters()
             # print("loadpeft_savedmodels")
 
-        # if torch.__version__ >= "2" and sys.platform != "win32":
-        #     model = torch.compile(model)
+        if torch.__version__ >= "2" and sys.platform != "win32":
+            model = torch.compile(model)
 
         return model
 
