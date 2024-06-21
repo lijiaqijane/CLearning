@@ -29,7 +29,12 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
 class LLMAgent(nn.Module):
     def __init__(
-        self, max_obs, max_token=100, normalization_mode="token", load_path=None, load_8bit=True
+        self,
+        max_obs,
+        max_token=100,
+        normalization_mode="token",
+        load_path=None,
+        load_8bit=True,
     ):
         super().__init__()
 
@@ -78,7 +83,9 @@ class LLMAgent(nn.Module):
         if not self.load_8bit:
             model.half().to(self.device)
         else:
-            model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
+            model = prepare_model_for_kbit_training(
+                model, use_gradient_checkpointing=True
+            )
 
         return model
 
@@ -116,7 +123,7 @@ class LLMAgent(nn.Module):
             # print("loadpeft_savedmodels")
 
         if torch.__version__ >= "2" and sys.platform != "win32":
-            model = torch.compile(model)
+            model = torch.compile(model, dynamic=True)
 
         return model
 
@@ -243,7 +250,6 @@ class LLMAgent(nn.Module):
         action=None,
         is_warmup=False,
         return_value_and_info=True,
-        need_encode=True
     ):
         action_list = [actions]
         action_num = len(action_list[0])
@@ -251,7 +257,6 @@ class LLMAgent(nn.Module):
         sequence = []
         for act in actions:
             sequence += [f"{prompt_str}{act}"]
-
 
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
         input_ids = inputs["input_ids"].to(self.device)
@@ -321,7 +326,7 @@ class LLMAgent(nn.Module):
                 probs.log_prob(action),
                 probs.entropy(),
                 self.get_value([prompt_str]),
-                prompt_tensor
+                prompt_tensor,
             )
         else:
             return action, probs.log_prob(action), probs.entropy(), None
