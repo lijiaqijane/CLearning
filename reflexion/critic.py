@@ -21,6 +21,10 @@ class Critic(nn.Module):
         self.rwtranrsformer = base_model
         self.PAD_ID = tokenizer.pad_token_id
 
+        # Ensure all parameters require gradients
+        for param in self.parameters():
+            param.requires_grad = True
+
     def gradient_checkpointing_enable(self):
         self.rwtranrsformer.gradient_checkpointing_enable()
 

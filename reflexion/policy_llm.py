@@ -129,6 +129,7 @@ class LLMAgent(nn.Module):
             )
             for name, param in model.named_parameters():
                 if "lora" in name:
+                    print("unfreezing", name)
                     param.requires_grad = True
             model.print_trainable_parameters()
             # print("loadpeft_savedmodels")
@@ -148,10 +149,13 @@ class LLMAgent(nn.Module):
     def _init_critic(self, critic_weights=None) -> Critic:
         critic = Critic(self.actor, self.tokenizer)
         if critic_weights is not None:
+            # critic.v_head_mlp3.load_state_dict(
+            #     torch.load(critic_weights, map_location="cpu")
+            # )  #!critic.v_head.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
             critic.v_head_mlp3.load_state_dict(
-                torch.load(critic_weights, map_location="cpu")
-            )  #!critic.v_head.load_state_dict(torch.load(critic_weights, map_location= "cpu"))
-        return critic
+                torch.load(critic_weights, map_location="cuda")
+            )
+            return critic
 
     @DeprecationWarning
     def get_model(self, prompt, k_sent=1):
