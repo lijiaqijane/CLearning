@@ -3,31 +3,17 @@ from typing import List, Union, Literal
 from enum import Enum
 import tiktoken
 from langchain.prompts import PromptTemplate
-from llm import AnyOpenAILLM, get_similarity_encoder, get_vectordb
+from llm import AnyOpenAILLM, get_similarity_encoder
 from policy_llm import LLMAgent
 from prompts import actonly_agent_prompt, feedback_agent_prompt
-from fewshots import CRAFTER_SAMPLE,  FEEDBACKS
+from fewshots import CRAFTER_SAMPLE, FEEDBACKS
 from sklearn.metrics.pairwise import cosine_similarity
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from langchain_community.llms import OpenAI
 import torch._dynamo
 torch._dynamo.config.suppress_errors = True
-import logging
-logger = logging.getLogger()
-logger.setLevel('INFO')
-formatter = logging.Formatter()
-chlr = logging.StreamHandler() 
-chlr.setFormatter(formatter)
-chlr.setLevel('INFO')  
-fhlr = logging.FileHandler('Log1.log')
-fhlr.setFormatter(formatter)
-logger.addHandler(chlr)
-logger.addHandler(fhlr)
-import sys
-log_print = open('Error1.log', 'w')
-sys.stdout = log_print
-sys.stderr = log_print
+
 
 class ReactAgent:
     def __init__(self,
@@ -38,8 +24,6 @@ class ReactAgent:
                  feedback_prompt: PromptTemplate = feedback_agent_prompt,
                  interact_llm : AnyOpenAILLM = AnyOpenAILLM(),     
                  sim_encoder = get_similarity_encoder(),
-                 retriever = get_vectordb()[0],
-                 collection = get_vectordb()[1]
                  ) -> None:
         self.task = task
         self.agent_prompt = agent_prompt
@@ -48,8 +32,6 @@ class ReactAgent:
         self.interact_llm = interact_llm
         self.feedback_prompt = feedback_prompt
         self.Agent = agent
-        self.retriever = retriever
-        self.collection = collection
         self.sim_encoder = sim_encoder
         self.previous_action = []
         self.previous_observation = []

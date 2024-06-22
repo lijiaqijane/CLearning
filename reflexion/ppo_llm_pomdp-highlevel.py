@@ -9,32 +9,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 import gym
-import crafter
+from reflexion.crafter import crafter_env
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
 from policy_llm import LLMAgent
+from action import ReactAgent, logger
 from torch.utils.tensorboard import SummaryWriter
-import argparse
-import pathlib
-from Crafter.crafter.api.envWrapper import *
-from Crafter.crafter.api.controller import *
-import re
-import datetime 
-import logging
-logger = logging.getLogger()
-logger.setLevel('INFO')
-formatter = logging.Formatter()
-chlr = logging.StreamHandler() 
-chlr.setFormatter(formatter)
-chlr.setLevel('INFO')  
-fhlr = logging.FileHandler('Log.log')
-fhlr.setFormatter(formatter)
-logger.addHandler(chlr)
-logger.addHandler(fhlr)
-import sys
-log_print = open('Error.log', 'w')
-sys.stdout = log_print
-sys.stderr = log_print
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.orthogonal_(layer.weight, std)
@@ -70,74 +50,43 @@ class Policy(nn.Module):
         self.resume = False
         self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0014"
         self.normalization_mode = "word"
-        self.actionlist = ['do nothing',
-                        'attack the zombie',
-                        'attack the skeleton',
-                        'chop the tree',
-                        'drink water',
-                        'place the stone',
-                        'place the table',
-                        'place the furnace',
-                        'place the plant',
-                        'craft the wood pickaxe',
-                        'craft the stone pickax',
-                        'craft the iron pickax',
-                        'craft the wood sword',
-                        'craft the stone sword',
-                        'craft the iron sword',
-                        'move to the grass',
-                        'move to the plant',
-                        'move to the stone',
-                        'move to the table',
-                        'move to the furnace',
-                        'move to the cow',
-                        'move to the zombie',
-                        'move to the skeleton',
-                        'move to the water',
-                        'move to the sand',
-                        'move to the tree',
-                        'move to the coal',
-                        'move to the iron',
-                        'move to the diamond',
-                        'move to the lava']
-                        
-        self.action_conv = {'do nothing':'noop', 
-        'attack the zombie':'interactWithBlock',
-        'attack the skeleton':'interactWithBlock',
-        'chop the tree':'interactWithBlock',
-        'drink water':'interactWithBlock',
-        'place the stone':'place_stone',
-        'place the table':'place_table',
-        'place the furnace':'place_furnace',
-        'place the plant':'place_plant',
-        'craft the wood pickaxe':'make_wood_pickaxe', 
-        'craft the stone pickax':'make_stone_pickaxe',
-        'craft the iron pickax':'make_iron_pickaxe',
-        'craft the wood sword':'make_wood_sword',
-        'craft the stone sword':'make_stone_sword',
-        'craft the iron sword':'make_iron_sword',
-        'move to the grass':"getToBlock('grass')",
-        'move to the plant':"getToBlock('plant')",
-        'move to the stone':"getToBlock('stone')",
-        'move to the table':"getToBlock('table')",
-        'move to the furnace':"getToBlock('furnace')",
-        'move to the cow':"getToBlock('cow')",
-        'move to the zombie':"getToBlock('zombie')",
-        'move to the skeleton':"getToBlock('skeleton')",
-        'move to the water':"getToBlock('water')",
-        'move to the sand':"getToBlock('sand')",
-        'move to the tree':"getToBlock('tree')",
-        'move to the coal':"getToBlock('coal')",
-        'move to the iron':"getToBlock('iron')",
-        'move to the diamond':"getToBlock('diamond')",
-        'move to the lava':"getToBlock('lava')"}
-        self.prompt = """
-You are playing the game Crafter.Here is your current observation:
+        self.prompt =  """You are playing a game. Please unlock as many achievements as possible while ensuring your survival. 
+Unlock following achievements < Collect Coal, Collect Diamond, Collect Drink, Collect Iron, Collect Sapling, Collect Stone, Collect Wood, kill Skeleton, kill Zombie, kill Cow, Eat Plant, Make Iron Pickaxe, Make Iron Sword, Make Stone Pickaxe, Make Stone Sword, Make Wood Pickaxe, Make Wood Sword, Place Furnace, Place Plant, Place Stone, Place Table, Wake Up >
+
+Here are the available actions:
+noop; # the player do nothing.
+getToBlock(block_name); # When the block is in the bot's view, move the player to the front of block. E.g., getToBlock('stone') will move the player to the stone block. If the block is in the front of bot, return "success". Otherwise, the player could not arrive at the block, return "failed".
+interactWithBlock; # interact with the block at the bot's front.
+exploreDirection(direction, n); # directs the player to explore in a specified direction about n steps. E.g., exploreDirection('left', 5) will move the player left about 5 steps. The directions include left, right, up, down, up-left, up-right, down-left, down-right.
+sleep; # put the player to sleep.
+place_stone; # place a stone block.
+place_table; # place a crafting table.
+place_furnace; # place a furnace.
+place_plant; # place a plant.
+make_wood_pickaxe; # craft a wood pickaxe.
+make_stone_pickaxe; # craft a stone pickaxe.
+make_iron_pickaxe; # craft an iron pickaxe.
+make_wood_sword; # craft a wood sword.
+make_stone_sword; # craft a stone sword.
+make_iron_sword; # craft an iron sword.
+
+I will give the player's in-game observation:
+You are on: ...
+You see (objects with coordinate): ...
+Your inventory (xx/9): ... 
+
+You should then respond to me with Thought or Action. You must follow the following criteria:
+1) You should act as a mentor and guide me to what to do based on my current progress. Do not ask question and answer with something unmeaningful. 
+2) When you attempt an action and observe no changes in the surrounding blocks or inventory, it indicates that the action has failed. Take into account any obstacles in the vicinity that may be impeding progress, or ensure that the necessary requirements for the task are met. Take a moment to analyze the situation and make any necessary adjustments to your approach.
+3) The next task should not be too hard since you may not have the necessary resources or have learned enough skills to complete it yet.
+4) You may sometimes need to repeat some tasks if you need to collect more resources to complete more difficult tasks. Only repeat tasks if necessary.
+5) You should choose available and feasible action.
+
+If you respond with Thought, you should only respond in the format: Think: ...
+If you respond with Action, you should only respond in the format: Action: ...
+
+Below are the history of your recent steps:
 """
-        self.user = """ 
-        To finish the following achievements < Collect Coal, Collect Diamond, Collect Drink, Collect Iron, Collect Sapling, Collect Stone, Collect Wood, kill Skeleton, kill Zombie, kill Cow, Eat Plant, Make Iron Pickaxe, Make Iron Sword, Make Stone Pickaxe, Make Stone Sword, Make Wood Pickaxe, Make Wood Sword, Place Furnace, Place Plant, Place Stone, Place Table, Wake Up >, 
-        you should first do action: '
-        """
 
         random.seed(self.seed)
         np.random.seed(self.seed)
@@ -168,77 +117,31 @@ You are playing the game Crafter.Here is your current observation:
         self.dones = torch.zeros((self.num_steps, 1)).to(self.device)
         self.values = torch.zeros((self.num_steps, 1)).to(self.device)
         self.steps = torch.zeros((self.num_steps, 1)).to(self.device)
+        #self.action_list = ["Thought","Search","Ask"]
         self.candidate_action_num = 1
 
+    def format_action(self, action_list):
+        actions = []
+        for i in action_list:
+            if i =='' or i ==' ' or (('Thought: ' not in i) and ('Ask: ' not in i) and ('Search: ' not in i)):
+                i = 'Thought: '+i
+            actions.append(i)
+        return actions
 
     def cutoff_obs(self, traj):
-        if len(traj) > 1:
+        if len(traj) > 3:
             traj.pop(0)
         return traj
-    
-    def controller_steps(self, env, action, tag=False):
-        bot = AgentController(env)
-        env_wrap = envWrapper(env)
-
-        if action.startswith('ACTION: '):
-            action = action.split(': ')[1]
-            try:
-                if '(' not in action:
-                    action = f"{action}()"
-                elif ',' in action:
-                    arg = action.split('(')[1].split(',')[0].strip(')')
-                    action = action.split('(')[0]+"('"+arg+"'," + action.split(',')[1]
-                    action = action.replace("''","'")
-                else:
-                    arg = action.split('(')[1].strip(')')
-                    action = action.split('(')[0]+"('"+arg+"')" 
-                    action = action.replace("''","'")
-                
-                logger.info('execute: '+action)
-                exec(f"bot.{action}")
-
-                if ('getToBlock' in action) or ('exploreDirection' in action):
-                     exec(f"bot.interactWithBlock()")
-
-                observation = env_wrap.describe_frame().replace('\n',' ')
-                tag=True
-            except:
-                observation = "The generated action is not valid. Please check the available actions."
-
-        elif action.startswith('THINK: '):
-            observation = ''
-        else:
-            observation ="The output is not recognized."
-
-        done = env.info['done']
-        achievements =env.info['achievements']
-        reward = env.info['reward']
-
-        return tag, observation, reward, done, achievements
 
     def trainer(self, task, step_cnt, frac,  writer, is_warmup = False):  ##？？做对提前结束
 
-        boolean = lambda x: bool(['False', 'True'].index(x))
-        parser = argparse.ArgumentParser()
-        parser.add_argument('--seed', type=int, default=0)
-        parser.add_argument('--area', nargs=2, type=int, default=(64, 64))
-        parser.add_argument('--view', type=int, nargs=2, default=(9, 9))
-        parser.add_argument('--length', type=int, default=None)
-        parser.add_argument('--health', type=int, default=9)
-        parser.add_argument('--window', type=int, nargs=2, default=(600, 600))
-        parser.add_argument('--size', type=int, nargs=2, default=(0, 0))
-        parser.add_argument('--load_world', type=pathlib.Path, default="/scratch/nlp/lijiaqi/CLearning/reflexion/Crafter/default")
-        parser.add_argument('--model', type=str, default="ReAct_with_coordinate")
-        parser.add_argument('--fps', type=int, default=3)
-        parser.add_argument('--wait', type=boolean, default=False)
-        parser.add_argument('--local_rank', type=int, default=0)
-        parser.add_argument('--gen_world', type=boolean, default=False)
-        args = parser.parse_args()
+        #prepare craft env
+        env = gym.make("smartplay:Crafter-v0")
+        env = crafter_env.WrapEnv(env)
+        env.set_task(task)
 
-        env = crafter.Env(seed= args.seed, args = args)
-        env.reset()
-
-        observation = self.controller_steps(env, 'ACTION: noop')[1]
+        reagent = ReactAgent(task, env, self.agent)  
+        observation = str(env.steps(['0.Noop'])[0])  
         trajectory = [observation+'\n' ]
 
         self.next_done = torch.zeros(1).to(self.device)
@@ -256,27 +159,65 @@ You are playing the game Crafter.Here is your current observation:
 
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                curr_obs = self.prompt + '\n'.join(trajectory)+'\n'+self.user
-                action, logprob, _, value = self.agent.get_action_and_value([curr_obs], self.actionlist)
-                action_str = 'ACTION: '+self.action_conv[self.actionlist[action.item()]]
-                res, next_obs, reward, done, achievement = self.controller_steps(env, action_str)
-  
+                action_list = ['Action: Noop','Action: Move West',  'Action: Move East', 'Action: Move North', 'Action: Move South',
+                                'Action: Do', 'Action: Sleep', 'Action: Place Stone','Action: Place Table', 'Action: Place Furnace', 'Action: Place Plant', 'Action: Make Wood Pickaxe',
+                                'Action: Make Stone Pickaxe', 'Action: Make Iron Pickaxe', 'Action: Make Wood Sword','Action: Make Stone Sword','Action: Make Iron Sword']
+                # action_list = ['Action: noop','Action: getToBlock(block_name)',  'Action: interactWithBlock', 'Action: exploreDirection(direction, n)', 
+                #                 'Action: Sleep', 'Action: Place Stone','Action: Place Table', 'Action: Place Furnace', 'Action: Place Plant', 'Action: Make Wood Pickaxe',
+                #                 'Action: Make Stone Pickaxe', 'Action: Make Iron Pickaxe', 'Action: Make Wood Sword','Action: Make Stone Sword','Action: Make Iron Sword']
 
-                trajectory.append('step '+str(step)+' '+action_str+'\n'+'Observation: '+next_obs+'\n')
-                trajectory = self.cutoff_obs(trajectory)
-                #logger.info(str(trajectory))
-                logger.info('###reward: {}, step: {}'.format(reward, step))
+                ##way1: orgin
+                #action_list = reagent.get_next_action(trajectory, self.candidate_action_num)
+
+                ##way2: step +1 only valid action
+                # executable_actions = env.get_executable_actions()
+                # action_list = []
+                # while len(action_list) < 3:
+                #     trys, try_tag = 1, False 
+                #     while trys < 6:
+                #         actionlist = reagent.get_next_action(trajectory, self.candidate_action_num)
+                #         logger.info('gen action_list:'+str(actionlist))
+                #         argument = actionlist[0].split(':')[1].strip(' ').split(', ')
+                #         if len(argument) == 2 and argument[0] in list(executable_actions.keys()) and int(argument[1]) in list(executable_actions.values()):
+                #             try_tag = True
+                #             action_list.extend(actionlist)
+                #             break
+                #         trys += 1
+                #     if try_tag is False:
+                #         actionlist = random.sample([ 'Action: ' +value+', '+str(key)  for key,value in executable_actions.items() ], self.candidate_action_num)
+                #         action_list.extend(actionlist)
+                #         logger.info('sample action_list:'+str(actionlist))
+                # ###step +1 only valid action
+                #logger.info('final action_list:'+str(action_list))
+
+                ##way3:  concat prompt + action
+                #logger.info(self.prompt + '\n'.join(trajectory))
+                action, logprob, _, value = self.agent.get_action_and_value([self.prompt + '\n'.join(trajectory)], action_list)
                 self.values[step] = value.flatten()
-
-
+                #logger.info('logprob  '+str(logprob))
             self.actions[step] = action
             self.logprobs[step] = logprob
+
+            ##orgin
+            #action_str = action_list[action.item()] 
+
+            executable_actions = env.get_executable_actions()
+            executable_action = action_list[action.item()]
+            action_str = executable_action+', '+str(executable_actions[executable_action.split(': ')[1]])
+            logger.info('get_action_and_value:'+str(action_str)+'   '+str(value))
+            trajectory, next_obs, reward, achievement, done, ach_subg, preact, preobs = reagent.step(action_str,  trajectory , next_obs_str)
+            trajectory = self.cutoff_obs(trajectory)
+            logger.info('###########reward: {}, step: {}'.format(reward, step))
             rewards += reward
 
-            self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) 
+            self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) ##??
             self.next_obs = self.agent.tokenizer(next_obs, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
             self.next_obs, next_done = torch.Tensor(self.next_obs).to(self.device), torch.Tensor([done]).to(self.device)
-            self.steps[step] = torch.Tensor(1).to(self.device)  
+            self.steps[step] = torch.Tensor(action).to(self.device)  ##?? item['macro_action_steps'] for item in info
+
+
+        # memory update
+        #reagent.update_memory(env.subgoal, ach_subg, preact, preobs)
 
             # bootstrap value if not done
         with torch.no_grad():
@@ -327,6 +268,7 @@ You are playing the game Crafter.Here is your current observation:
         approx_kl = torch.tensor(0)
         total_approx_kl = torch.tensor(0)
         
+        torch.cuda.empty_cache()
         for epoch in range(self.update_epochs):
             if kl_explode:
                 break
@@ -387,7 +329,7 @@ You are playing the game Crafter.Here is your current observation:
                 # logger.info('b_actions[mb_inds]:'+str(b_actions[mb_inds]))
                 mb_inds = b_inds[start:end][0]
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
-                _, newlogprob, entropy, newvalue = self.agent.get_action_and_value([b_obs_str], self.actionlist, b_actions[mb_inds], is_warmup, return_value = False)
+                _, newlogprob, entropy, newvalue = self.agent.get_action_and_value([b_obs_str], action_list, b_actions[mb_inds], is_warmup, return_value = False)
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
 
@@ -464,17 +406,17 @@ You are playing the game Crafter.Here is your current observation:
         else:
             num_clipfracs = np.mean(clipfracs)
 
-        # writer.add_scalar("charts/policy_learning_rate", self.policy_optimizer.param_groups[0]["lr"], step_cnt)
-        # writer.add_scalar("charts/value_learning_rate", self.value_optimizer.param_groups[0]["lr"], step_cnt)
-        # writer.add_scalar("losses/value_loss", v_loss.item(), step_cnt)
-        # writer.add_scalar("losses/policy_loss", pg_loss.item(), step_cnt)
-        # writer.add_scalar("losses/entropy", entropy_loss.item(), step_cnt)
-        # writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), step_cnt)
-        # writer.add_scalar("losses/approx_kl", approx_kl.item(), step_cnt)
-        # writer.add_scalar("losses/total_approx_kl", total_approx_kl.item(), step_cnt)
-        # writer.add_scalar("losses/policy_update_times", policy_update_steps // self.gradient_checkpointing_steps, step_cnt)
-        # writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
-        # writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
+        writer.add_scalar("charts/policy_learning_rate", self.policy_optimizer.param_groups[0]["lr"], step_cnt)
+        writer.add_scalar("charts/value_learning_rate", self.value_optimizer.param_groups[0]["lr"], step_cnt)
+        writer.add_scalar("losses/value_loss", v_loss.item(), step_cnt)
+        writer.add_scalar("losses/policy_loss", pg_loss.item(), step_cnt)
+        writer.add_scalar("losses/entropy", entropy_loss.item(), step_cnt)
+        writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/approx_kl", approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/total_approx_kl", total_approx_kl.item(), step_cnt)
+        writer.add_scalar("losses/policy_update_times", policy_update_steps // self.gradient_checkpointing_steps, step_cnt)
+        writer.add_scalar("losses/clipfrac", num_clipfracs, step_cnt)
+        writer.add_scalar("losses/explained_variance", explained_var, step_cnt)
         
         return step_cnt, rewards, achievement
 

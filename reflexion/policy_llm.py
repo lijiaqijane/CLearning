@@ -230,13 +230,17 @@ class LLMAgent(nn.Module):
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
         input_ids = inputs["input_ids"].to(self.device)
         
+        print(input_ids.shape)
+        print(input_ids)
         attention_mask = inputs["attention_mask"]
         if is_warmup:
             with torch.no_grad():
                 outputs = self.actor(input_ids, attention_mask=attention_mask)
         else:
             outputs = self.actor(input_ids, attention_mask=attention_mask)
-        
+
+        print(outputs.logits.shape)
+        print(outputs.logits)
         action_list = [item for sublist in action_list for item in sublist]
         self.action_list_ids = self.tokenizer(action_list, return_tensors="pt", padding=True)
 
@@ -277,3 +281,17 @@ class LLMAgent(nn.Module):
 
     def format_step(step: str) -> str:
         return step.strip('\n').strip().replace('\n\n', ' ').replace('\n', ' ').replace('\'', '')
+        ## generate through class transformers.modeling_outputs.CausalLMOutputWithPast
+        # generated = input_ids[0].tolist()
+        # for i in range(30):
+        #     if is_warmup:
+        #         with torch.no_grad():
+        #             outputs = self.actor(input_ids, attention_mask=attention_mask, output_hidden_states=True)
+        #     else:
+        #         outputs = self.actor(input_ids, attention_mask=attention_mask, output_hidden_states=True)
+
+        #     generated += [torch.argmax(outputs.logits[:, -1, :]).tolist()]
+
+        # print(generated)
+        # response = self.tokenizer.decode(generated)
+        # print(response)

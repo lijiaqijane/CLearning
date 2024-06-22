@@ -19,7 +19,7 @@ import pathlib
 from Crafter.crafter.api.envWrapper import *
 from Crafter.crafter.api.controller import *
 import re
-import datetime 
+import datetime
 import logging
 logger = logging.getLogger()
 logger.setLevel('INFO')
@@ -70,69 +70,27 @@ class Policy(nn.Module):
         self.resume = False
         self.load_path = "/scratch/nlp/lijiaqi/CLearning/reflexion/result/epoch_0014"
         self.normalization_mode = "word"
-        self.actionlist = ['do nothing',
-                        'attack the zombie',
-                        'attack the skeleton',
-                        'chop the tree',
-                        'drink water',
-                        'place the stone',
-                        'place the table',
-                        'place the furnace',
-                        'place the plant',
-                        'craft the wood pickaxe',
-                        'craft the stone pickax',
-                        'craft the iron pickax',
-                        'craft the wood sword',
-                        'craft the stone sword',
-                        'craft the iron sword',
-                        'move to the grass',
-                        'move to the plant',
-                        'move to the stone',
-                        'move to the table',
-                        'move to the furnace',
-                        'move to the cow',
-                        'move to the zombie',
-                        'move to the skeleton',
-                        'move to the water',
-                        'move to the sand',
-                        'move to the tree',
-                        'move to the coal',
-                        'move to the iron',
-                        'move to the diamond',
-                        'move to the lava']
-                        
-        self.action_conv = {'do nothing':'noop', 
-        'attack the zombie':'interactWithBlock',
-        'attack the skeleton':'interactWithBlock',
-        'chop the tree':'interactWithBlock',
-        'drink water':'interactWithBlock',
-        'place the stone':'place_stone',
-        'place the table':'place_table',
-        'place the furnace':'place_furnace',
-        'place the plant':'place_plant',
-        'craft the wood pickaxe':'make_wood_pickaxe', 
-        'craft the stone pickax':'make_stone_pickaxe',
-        'craft the iron pickax':'make_iron_pickaxe',
-        'craft the wood sword':'make_wood_sword',
-        'craft the stone sword':'make_stone_sword',
-        'craft the iron sword':'make_iron_sword',
-        'move to the grass':"getToBlock('grass')",
-        'move to the plant':"getToBlock('plant')",
-        'move to the stone':"getToBlock('stone')",
-        'move to the table':"getToBlock('table')",
-        'move to the furnace':"getToBlock('furnace')",
-        'move to the cow':"getToBlock('cow')",
-        'move to the zombie':"getToBlock('zombie')",
-        'move to the skeleton':"getToBlock('skeleton')",
-        'move to the water':"getToBlock('water')",
-        'move to the sand':"getToBlock('sand')",
-        'move to the tree':"getToBlock('tree')",
-        'move to the coal':"getToBlock('coal')",
-        'move to the iron':"getToBlock('iron')",
-        'move to the diamond':"getToBlock('diamond')",
-        'move to the lava':"getToBlock('lava')"}
+        self.actionlist = ['noop','interactWithBlock','sleep','place_stone','place_table','place_furnace','place_plant','make_wood_pickaxe','make_stone_pickaxe',
+        'make_iron_pickaxe','make_wood_sword','make_stone_sword','make_iron_sword']
         self.prompt = """
-You are playing the game Crafter.Here is your current observation:
+You are playing the game Crafter. Here are the available actions:
+noop; 
+getToBlock(block_name); 
+interactWithBlock; 
+exploreDirection(direction, n); 
+sleep; 
+place_stone;
+place_table; 
+place_furnace; 
+place_plant; 
+make_wood_pickaxe; 
+make_stone_pickaxe; 
+make_iron_pickaxe;
+make_wood_sword; 
+make_stone_sword; 
+make_iron_sword; 
+
+Here is your current observation:
 """
         self.user = """ 
         To finish the following achievements < Collect Coal, Collect Diamond, Collect Drink, Collect Iron, Collect Sapling, Collect Stone, Collect Wood, kill Skeleton, kill Zombie, kill Cow, Eat Plant, Make Iron Pickaxe, Make Iron Sword, Make Stone Pickaxe, Make Stone Sword, Make Wood Pickaxe, Make Wood Sword, Place Furnace, Place Plant, Place Stone, Place Table, Wake Up >, 
@@ -175,7 +133,7 @@ You are playing the game Crafter.Here is your current observation:
         if len(traj) > 1:
             traj.pop(0)
         return traj
-    
+
     def controller_steps(self, env, action, tag=False):
         bot = AgentController(env)
         env_wrap = envWrapper(env)
@@ -216,6 +174,39 @@ You are playing the game Crafter.Here is your current observation:
 
         return tag, observation, reward, done, achievements
 
+
+
+    def match_action(self, resp, tag = False):
+        resp = resp.replace('```','').replace('\n\n','').replace('\n','')
+        logger.info([resp])
+        match = re.search(r"ACTION: \s*(.*)", resp, re.MULTILINE)
+        if match is not None:
+            content = match.group(1)
+            #logger.info('match:'+ str(content))
+            for v in self.actionlist:
+                logger.info(v)
+                if (v in content):
+                    return v
+                elif ('getToBlock' in content) or ('exploreDirection' in content):
+                    return content.split(')')[0]+')'
+
+        match = re.findall(r"`.*?`", resp)
+        if match != []:
+            #logger.info('match1:'+ str(match))
+            for i in match:
+                i = i.strip('`').strip('\n').strip(';')
+                if (i in self.actionlist) or ('getToBlock' in i) or ('exploreDirection' in i):
+                    return i
+
+        match = re.search(r"THINK: \s*(.*)", resp, re.MULTILINE)
+        if not match:
+            return None
+        content = 'THINK: '+match.group(1).split('\n')[0]
+        #logger.info('match2:'+ str(content))
+        return content
+
+
+
     def trainer(self, task, step_cnt, frac,  writer, is_warmup = False):  ##？？做对提前结束
 
         boolean = lambda x: bool(['False', 'True'].index(x))
@@ -253,24 +244,52 @@ You are playing the game Crafter.Here is your current observation:
             self.obs[step] = self.next_obs
             self.dones[step] = self.next_done
 
-
+            logger.info('start_gen: '+str(datetime.datetime.now()))
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
-                curr_obs = self.prompt + '\n'.join(trajectory)+'\n'+self.user
-                action, logprob, _, value = self.agent.get_action_and_value([curr_obs], self.actionlist)
-                action_str = 'ACTION: '+self.action_conv[self.actionlist[action.item()]]
-                res, next_obs, reward, done, achievement = self.controller_steps(env, action_str)
-  
+                trys , try_tag = 1, False
+                while trys <=3:
+                    curr_obs = self.prompt + '\n'.join(trajectory)+'\n'+self.user
+                    action_str = ''
+                    action_str = self.agent.get_model(curr_obs, self.candidate_action_num)
+                    #logger.info('------------------------------------')
+                    action_str = self.match_action(action_str[0])
+                    
+                    if (action_str is not None) and (not action_str.startswith('THINK: ')):
+                        #logger.info('parsed:'+action_str)
+                        action_str = 'ACTION: '+action_str
+                        res, next_obs, reward, done, achievement = self.controller_steps(env, action_str)
+                        if res:
+                            try_tag = True
+                            break
+                    elif (action_str is not None) and action_str.startswith('THINK: '):
+                        trajectory.append(action_str)
+                    # else:
+                    #     curr_obs += 'The generated action is not valid. Please check the available actions.'
+                    
+                    trys += 1
+                    
+                    del action_str
+                    torch.cuda.empty_cache()
+
+                if try_tag is False:
+                    action_str = random.sample([ 'ACTION: ' +i  for i in self.actionlist ], 1)[0]
+                    res, next_obs, reward, done, achievement = self.controller_steps(env, action_str)
 
                 trajectory.append('step '+str(step)+' '+action_str+'\n'+'Observation: '+next_obs+'\n')
                 trajectory = self.cutoff_obs(trajectory)
                 #logger.info(str(trajectory))
                 logger.info('###reward: {}, step: {}'.format(reward, step))
-                self.values[step] = value.flatten()
 
+                logger.info('start_get_value: '+str(datetime.datetime.now()))
+                action, logprob, _, value = self.agent.get_action_and_value([self.prompt + '\n'.join(trajectory)], action_str)
+                self.values[step] = value.flatten()
+         
 
             self.actions[step] = action
             self.logprobs[step] = logprob
+
+            
             rewards += reward
 
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) 
@@ -278,7 +297,7 @@ You are playing the game Crafter.Here is your current observation:
             self.next_obs, next_done = torch.Tensor(self.next_obs).to(self.device), torch.Tensor([done]).to(self.device)
             self.steps[step] = torch.Tensor(1).to(self.device)  
 
-            # bootstrap value if not done
+        # bootstrap value if not done
         with torch.no_grad():
 
             next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
@@ -371,7 +390,9 @@ You are playing the game Crafter.Here is your current observation:
             logger.info('Update value')
             logger.info('value_loss  '+str(loss.item()))
             logger.info('v_loss  '+str(v_loss.item()))
-
+            del self.value_optimizer, loss
+            torch.cuda.empty_cache()
+            
             self.policy_optimizer.zero_grad()            
             #update policy
             print('---------------------------------')
@@ -387,7 +408,7 @@ You are playing the game Crafter.Here is your current observation:
                 # logger.info('b_actions[mb_inds]:'+str(b_actions[mb_inds]))
                 mb_inds = b_inds[start:end][0]
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
-                _, newlogprob, entropy, newvalue = self.agent.get_action_and_value([b_obs_str], self.actionlist, b_actions[mb_inds], is_warmup, return_value = False)
+                _, newlogprob, entropy, newvalue = self.agent.get_action_and_value([b_obs_str], self.actionlist, b_actions[mb_inds], is_warmup = True, return_value = False)
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
 

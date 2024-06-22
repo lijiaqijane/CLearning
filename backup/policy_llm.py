@@ -195,11 +195,8 @@ class LLMAgent(nn.Module):
         exp_path = os.path.join(exp_path, "epoch_{:04d}".format(epoch))
 
         os.makedirs(exp_path, exist_ok=True)
-        # save lora
-        #logger.info(list(self.agent.actor.parameters()))
-        #logger.info(list(filter(lambda p: p.requires_grad, self.actor.parameters())))
-        self.actor.save_pretrained(exp_path)  # safe_serialization=False
-        # save critic
+        self.actor.save_pretrained(exp_path)  
+
         torch.save(self.critic.v_head_mlp3.state_dict(), os.path.join(exp_path, "critic.pth"))
 
     def load(self, exp_path):

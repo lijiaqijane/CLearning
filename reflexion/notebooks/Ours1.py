@@ -14,8 +14,8 @@ import random
 import os
 from torch.utils.tensorboard import SummaryWriter
 from transformers import  AutoTokenizer
-#from ppo_llm_pomdp_lowlevel_gen import Policy, logger
-from ppo_llm_pomdp import Policy, logger
+from ppo_llm_pomdp_lowlevel_gen import Policy, logger
+#from ppo_llm_pomdp import Policy, logger
 
 
 
@@ -41,16 +41,17 @@ def get_achievement(pre_ach, ach):
 task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond','collect_drink','collect_sapling','defeat_skeleton','defeat_zombie','eat_cow','wake_up'])
 #task = 'eat_cow'
 num_updates = 1000   ##??最大步数
-num_steps = 1
+num_steps = 500
 
 # writer = SummaryWriter(f"../writer/")
-policy = Policy(max_steps= num_steps, max_obs = 220)  
+policy = Policy(max_steps= num_steps, max_obs = 200)  
 
 for update in range(1, num_updates+1): #num_updates + 1
     logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   
     #logger.info('==========='+str(task))
+
 
     pre_achievement = {'collect_coal': 0, 'collect_diamond': 0, 'collect_drink': 0, 'collect_iron': 0,
                              'collect_sapling': 0, 'collect_stone': 0, 'collect_wood': 0, 'kill_skeleton': 0,
@@ -59,14 +60,12 @@ for update in range(1, num_updates+1): #num_updates + 1
                              'make_wood_pickaxe': 0, 'make_wood_sword': 0, 'place_furnace': 0, 'place_plant': 0,
                              'place_stone': 0, 'place_table': 0, 'wake_up': 0}
 
-
     frac = 1.0 - (update - 1.0) / num_updates
     global_step = (update-1) * num_steps
     global_step, rewards, achievement= policy.trainer(task, global_step, frac, writer=None)
-    print(achievement)
 
     if global_step // num_steps > 0 : 
-        policy.agent.save(global_step // num_steps, "../result/")
+        policy.agent.save(global_step // num_steps, "../result1/")
 
 
     if  pre_achievement != achievement:

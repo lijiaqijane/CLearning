@@ -1,0 +1,33 @@
+{
+    "seed": 0,
+    "area": [
+        64,
+        64
+    ],
+    "view": [
+        9,
+        9
+    ],
+    "length": null,
+    "health": 9,
+    "window": [
+        600,
+        600
+    ],
+    "size": [
+        0,
+        0
+    ],
+    "record": "create_world/default",
+    "fps": 3,
+    "wait": false,
+    "death": "continue",
+    "gen_world": true,
+    "change_terrain": false,
+    "terrian_kind": "permutation",
+    "change_npc": false,
+    "npc_objects": [],
+    "change_drink": false,
+    "drink": [],
+    "change_achievement": false
+}
