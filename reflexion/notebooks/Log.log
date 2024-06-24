@@ -1,22 +1,6 @@
 ===========Current train update: 1
 execute: noop()
-execute: place_stone()
-###reward: 0.0, step: 0
-Update value
-value_loss  0.0002168236387660727
-v_loss  0.0004336472775321454
-Update policy
-policy_loss  0.007065013982355595
-pg_loss  0.0823075920343399
-old_approx_kl  1.7780208587646484
-approx_kl  0.9469931125640869
-total_approx_kl  0.11837413907051086
-Finish epoch
-===========Current_step: 1,  =====total_reward: 0.0
-===========Current train update: 2
-execute: noop()
-execute: getToBlock('skeleton')
-###reward: 0.0, step: 0
-Update value
-value_loss  0.003984370268881321
-v_loss  0.007968740537762642
+当前显卡显存使用情况：总共 81920.0 MB， 已经使用 10470.19 MB， 剩余 71449.81 MB
+init
+reset context of device 0
+after get_action_and_value 81920.0 MB， 已经使用 694.19 MB， 剩余 81225.81 MB

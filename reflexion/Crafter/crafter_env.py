@@ -61,7 +61,7 @@ class WrapEnv:
             prog = list()
             for task, (task_name, num) in enumerate(self.subgoal):
                 prog.append([task_name, (self.achievements[task_name], num)])
-            print(prog)
+
 
 
     def get_executable_actions(self):

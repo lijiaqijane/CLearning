@@ -20,6 +20,9 @@ from Crafter.crafter.api.envWrapper import *
 from Crafter.crafter.api.controller import *
 import re
 import datetime 
+import os
+import psutil
+import gc
 import logging
 logger = logging.getLogger()
 logger.setLevel('INFO')
@@ -35,6 +38,9 @@ import sys
 log_print = open('Error.log', 'w')
 sys.stdout = log_print
 sys.stderr = log_print
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.orthogonal_(layer.weight, std)
@@ -134,10 +140,12 @@ class Policy(nn.Module):
         self.prompt = """
 You are playing the game Crafter.Here is your current observation:
 """
+
+        self.prompt = " "
         self.user = """ 
-        To finish the following achievements < Collect Coal, Collect Diamond, Collect Drink, Collect Iron, Collect Sapling, Collect Stone, Collect Wood, kill Skeleton, kill Zombie, kill Cow, Eat Plant, Make Iron Pickaxe, Make Iron Sword, Make Stone Pickaxe, Make Stone Sword, Make Wood Pickaxe, Make Wood Sword, Place Furnace, Place Plant, Place Stone, Place Table, Wake Up >, 
-        you should first do action: '
+        To finish the following achievements < Collect Coal, Collect Diamond, Collect Drink, Collect Iron, Collect Sapling, Collect Stone, Collect Wood, kill Skeleton, kill Zombie, kill Cow, Eat Plant, Make Iron Pickaxe, Make Iron Sword, Make Stone Pickaxe, Make Stone Sword, Make Wood Pickaxe, Make Wood Sword, Place Furnace, Place Plant, Place Stone, Place Table, Wake Up >, you should first do: '
         """
+
 
         random.seed(self.seed)
         np.random.seed(self.seed)
@@ -216,6 +224,28 @@ You are playing the game Crafter.Here is your current observation:
 
         return tag, observation, reward, done, achievements
 
+    def get_gpu_mem_info(self, gpu_id=0):
+        import pynvml
+        pynvml.nvmlInit()
+        if gpu_id < 0 or gpu_id >= pynvml.nvmlDeviceGetCount():
+            print(r'gpu_id {} 对应的显卡不存在!'.format(gpu_id))
+            return 0, 0, 0
+
+        handler = pynvml.nvmlDeviceGetHandleByIndex(gpu_id)
+        meminfo = pynvml.nvmlDeviceGetMemoryInfo(handler)
+        total = round(meminfo.total / 1024 / 1024, 2)
+        used = round(meminfo.used / 1024 / 1024, 2)
+        free = round(meminfo.free / 1024 / 1024, 2)
+        return total, used, free
+
+
+    def get_cpu_mem_info(self):
+        mem_total = round(psutil.virtual_memory().total / 1024 / 1024, 2)
+        mem_free = round(psutil.virtual_memory().available / 1024 / 1024, 2)
+        mem_process_used = round(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024, 2)
+        return mem_total, mem_free, mem_process_used
+
+
     def trainer(self, task, step_cnt, frac,  writer, is_warmup = False):  ##？？做对提前结束
 
         boolean = lambda x: bool(['False', 'True'].index(x))
@@ -247,6 +277,9 @@ You are playing the game Crafter.Here is your current observation:
         self.policy_optimizer.param_groups[0]["lr"] = frac * self.policy_learning_rate
         self.value_optimizer.param_groups[0]["lr"] = frac * self.value_learning_rate
         
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        logger.info(r'当前显卡显存使用情况：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
         rewards = 0
         for step in range(0, self.num_steps):
             step_cnt += 1 
@@ -257,10 +290,29 @@ You are playing the game Crafter.Here is your current observation:
             with torch.no_grad():
                 next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
                 curr_obs = self.prompt + '\n'.join(trajectory)+'\n'+self.user
+
+                # gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+                # logger.info(r'after next_obs_str：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
                 action, logprob, _, value = self.agent.get_action_and_value([curr_obs], self.actionlist)
+                import os
+                os.environ['TORCH_USE_CUDA_DSA']='1'
+                from  numba import cuda
+                device = cuda.get_current_device()
+                device.reset()
+                # cuda.select_device(0) 
+                # cuda.close() 
+
+                gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+                logger.info(r'after get_action_and_value {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
                 action_str = 'ACTION: '+self.action_conv[self.actionlist[action.item()]]
+
+                #gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+                # logger.info(r'after action_str ：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
                 res, next_obs, reward, done, achievement = self.controller_steps(env, action_str)
   
+                # gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+                # logger.info(r'after controller_steps：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
 
                 trajectory.append('step '+str(step)+' '+action_str+'\n'+'Observation: '+next_obs+'\n')
                 trajectory = self.cutoff_obs(trajectory)
@@ -268,7 +320,7 @@ You are playing the game Crafter.Here is your current observation:
                 logger.info('###reward: {}, step: {}'.format(reward, step))
                 self.values[step] = value.flatten()
 
-
+            #logger.info('action:'+str(action))
             self.actions[step] = action
             self.logprobs[step] = logprob
             rewards += reward
@@ -276,9 +328,11 @@ You are playing the game Crafter.Here is your current observation:
             self.rewards[step] = torch.tensor(reward).to(self.device).view(-1) 
             self.next_obs = self.agent.tokenizer(next_obs, return_tensors="pt", padding='max_length', max_length = self.obs_length)["input_ids"].to(self.device)
             self.next_obs, next_done = torch.Tensor(self.next_obs).to(self.device), torch.Tensor([done]).to(self.device)
-            self.steps[step] = torch.Tensor(1).to(self.device)  
+            self.steps[step] = torch.Tensor([1]).to(self.device)  
 
-            # bootstrap value if not done
+        # gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        # logger.info(r'after step：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+        # bootstrap value if not done
         with torch.no_grad():
 
             next_obs_str = self.agent.tokenizer.decode(self.next_obs[0])
@@ -303,7 +357,7 @@ You are playing the game Crafter.Here is your current observation:
             returns = advantages +self.values
 
         # logger.info('advantages:'+str(advantages))
-        # logger.info('returns:'+str(returns))
+        #logger.info('returns:'+str(returns))
         # flatten the batch
         b_obs = self.obs.reshape((-1,) + (self.obs_length,))
         b_logprobs = self.logprobs.reshape(-1)
@@ -327,6 +381,9 @@ You are playing the game Crafter.Here is your current observation:
         approx_kl = torch.tensor(0)
         total_approx_kl = torch.tensor(0)
         
+        # gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        # logger.info(r'当前显卡显存使用情况：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
         for epoch in range(self.update_epochs):
             if kl_explode:
                 break
@@ -345,23 +402,34 @@ You are playing the game Crafter.Here is your current observation:
 
                 b_obs_str = self.agent.tokenizer.decode(b_obs[mb_inds].int())
                 newvalue = self.agent.get_value([b_obs_str])
+                #logger.info('newvalue:'+str(newvalue))
 
                 # Value loss
                 newvalue = newvalue.view(-1)
                 if self.clip_vloss:
                     v_loss_unclipped = (newvalue - b_returns[mb_inds]) ** 2
+                    # logger.info('b_returns:'+str(b_returns))
+                    # logger.info('mb_inds:'+str(mb_inds))
+                    # logger.info('v_loss_unclipped:'+str(v_loss_unclipped))
                     v_clipped = b_values[mb_inds] + torch.clamp(
                         newvalue - b_values[mb_inds],
                         -self.clip_coef,
                         self.clip_coef,
                     )
+                    
                     v_loss_clipped = (v_clipped - b_returns[mb_inds]) ** 2
                     v_loss_max = torch.max(v_loss_unclipped, v_loss_clipped)
+                    
                     v_loss = 0.5 * v_loss_max.mean()
                 else:
                     v_loss = 0.5 * ((newvalue - b_returns[mb_inds]) ** 2).mean()
 
                 loss = v_loss * self.vf_coef
+                # logger.info('v_clipped:'+str(v_clipped))
+                # logger.info('v_loss_clipped:'+str(v_loss_clipped))
+                # logger.info('v_loss_max:'+str(v_loss_max))
+                # logger.info('v_loss:'+str(v_loss))
+                # logger.info('loss:'+str(v_loss))
 
                 self.value_optimizer.zero_grad()
                 loss.backward()
@@ -371,6 +439,9 @@ You are playing the game Crafter.Here is your current observation:
             logger.info('Update value')
             logger.info('value_loss  '+str(loss.item()))
             logger.info('v_loss  '+str(v_loss.item()))
+
+            gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+            logger.info(r'当前显卡显存使用情况：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
 
             self.policy_optimizer.zero_grad()            
             #update policy
@@ -399,11 +470,6 @@ You are playing the game Crafter.Here is your current observation:
                 # logger.info('logratio:'+str(logratio))
                 # logger.info('ratio:'+str(ratio))
 
-                # logratio = newlogprob.item() - b_logprobs[mb_inds].item()
-                # ratio = logratio.exp()
-                # logger.info('logratio:'+str(logratio))
-                # logger.info('ratio:'+str(ratio))
-
                 with torch.no_grad():
                     old_approx_kl = (-logratio).mean()
                     approx_kl = ((ratio - 1) - logratio).mean()
@@ -411,12 +477,12 @@ You are playing the game Crafter.Here is your current observation:
                     clipfracs += [((ratio - 1.0).abs() > self.clip_coef).float().mean().item()]
 
                 mb_advantages = b_advantages[mb_inds]
-                # logger.info('mb_advantages:'+str(mb_advantages))
+                #logger.info('mb_advantages:'+str(mb_advantages))
 
                 if self.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
 
-                # logger.info('mb_advantages:'+str(mb_advantages))
+                #logger.info('mb_advantages:'+str(mb_advantages))
                 # Policy loss
                 pg_loss1 = -mb_advantages * ratio
                 pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - self.clip_coef, 1 + self.clip_coef)
@@ -447,22 +513,36 @@ You are playing the game Crafter.Here is your current observation:
                     self.policy_optimizer.step()
                     self.policy_optimizer.zero_grad()    
 
+                
+            gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+            logger.info(r'当前显卡显存使用情况：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
+        
             logger.info('Update policy')
             logger.info('policy_loss  '+str(loss.item()))
             logger.info('pg_loss  '+str(pg_loss.item()))
 
-        logger.info('old_approx_kl  '+str(old_approx_kl.item()))
-        logger.info('approx_kl  '+str(approx_kl.item()))
-        logger.info('total_approx_kl  '+str(total_approx_kl.item()))
-        logger.info('Finish epoch') 
-        y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
-        var_y = np.var(y_true)
-        explained_var = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
+            del newlogprob, b_logprobs, logratio, ratio, entropy, entropy_loss, b_obs_str, loss, newvalue, pg_loss, v_loss, pg_loss1, pg_loss2, mb_advantages
+            torch.cuda.empty_cache()
+            del old_approx_kl, approx_kl, total_approx_kl, clipfracs, b_values # y_pred, y_true, var_y, explained_var
+            torch.cuda.empty_cache()
 
-        if len(clipfracs) == 0:
-            num_clipfracs = 0
-        else:
-            num_clipfracs = np.mean(clipfracs)
+        # logger.info('old_approx_kl  '+str(old_approx_kl.item()))
+        # logger.info('approx_kl  '+str(approx_kl.item()))
+        # logger.info('total_approx_kl  '+str(total_approx_kl.item()))
+        logger.info('Finish epoch') 
+
+        # y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
+        # var_y = np.var(y_true)
+        # explained_var = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
+
+        # if len(clipfracs) == 0:
+        #     num_clipfracs = 0
+        # else:
+        #     num_clipfracs = np.mean(clipfracs)
+    
+        # cuda.select_device(0) # 方法二：选择GPU1
+        # cuda.close() #关闭选择的GPU
 
         # writer.add_scalar("charts/policy_learning_rate", self.policy_optimizer.param_groups[0]["lr"], step_cnt)
         # writer.add_scalar("charts/value_learning_rate", self.value_optimizer.param_groups[0]["lr"], step_cnt)

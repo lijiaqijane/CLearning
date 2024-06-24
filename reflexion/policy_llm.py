@@ -189,7 +189,7 @@ class LLMAgent(nn.Module):
 
     
     def save(self, epoch, exp_path):
-        print("save model")
+
         exp_path = os.path.join(exp_path, "epoch_{:04d}".format(epoch))
 
         os.makedirs(exp_path, exist_ok=True)
@@ -201,7 +201,7 @@ class LLMAgent(nn.Module):
         torch.save(self.critic.v_head_mlp3.state_dict(), os.path.join(exp_path, "critic.pth"))
 
     def load(self, exp_path):
-        print("----------------load model")
+
         lora_weights = exp_path
         critic_weights = os.path.join(exp_path, "critic.pth")
         self.actor = self._init_actor(lora_weights).to(self.device)
@@ -225,13 +225,11 @@ class LLMAgent(nn.Module):
 
         sequence = []
         for p, ac in zip(prompt, action_list):
-            sequence += [p + " " + a for a in ac]
+            sequence += [(p + " " + a).replace('\n',' ') for a in ac]
 
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
         input_ids = inputs["input_ids"].to(self.device)
         
-        print(input_ids.shape)
-        print(input_ids)
         attention_mask = inputs["attention_mask"]
         if is_warmup:
             with torch.no_grad():
@@ -239,8 +237,6 @@ class LLMAgent(nn.Module):
         else:
             outputs = self.actor(input_ids, attention_mask=attention_mask)
 
-        print(outputs.logits.shape)
-        print(outputs.logits)
         action_list = [item for sublist in action_list for item in sublist]
         self.action_list_ids = self.tokenizer(action_list, return_tensors="pt", padding=True)
 
@@ -274,6 +270,13 @@ class LLMAgent(nn.Module):
         if action is None:
             action = probs.sample()
 
+        del outputs, logits, gen_logits
+        torch.cuda.empty_cache()
+
+        # from accelerate.utils import release_memory
+        # release_memory(self.actor)
+
+        
         if return_value:
             return action, probs.log_prob(action), probs.entropy(), self.get_value(prompt)
         else:
