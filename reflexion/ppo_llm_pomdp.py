@@ -295,13 +295,6 @@ You are playing the game Crafter.Here is your current observation:
                 # logger.info(r'after next_obs_str：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
 
                 action, logprob, _, value = self.agent.get_action_and_value([curr_obs], self.actionlist)
-                import os
-                os.environ['TORCH_USE_CUDA_DSA']='1'
-                from  numba import cuda
-                device = cuda.get_current_device()
-                device.reset()
-                # cuda.select_device(0) 
-                # cuda.close() 
 
                 gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
                 logger.info(r'after get_action_and_value {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
