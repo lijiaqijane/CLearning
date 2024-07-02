@@ -23,8 +23,8 @@ root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.append(root)
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-
-
+import re
+import deepspeed, gc
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.orthogonal_(layer.weight, std)
@@ -56,65 +56,73 @@ class LLMAgent(nn.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
         self.tokenizer.pad_token_id = (0)
         self.llama = self._init_llama()
-
+        
         if load_path:
             self.load(load_path)
         else:
             self.actor = self._init_actor().to(self.device)
             self.critic = self._init_critic().to(self.device)
+            # self.actor, _, _, _ = deepspeed.initialize(
+            #         model=self.actor,
+            #         model_parameters=self.actor.parameters(),
+            #         config_params='/scratch/nlp/lijiaqi/CLearning/reflexion/ds_config.json'
+            #     )
+            # self.critic, _, _, _ = deepspeed.initialize(
+            #         model=self.critic,
+            #         model_parameters=self.critic.parameters(),
+            #         config_params='/scratch/nlp/lijiaqi/CLearning/reflexion/ds_config.json'
+            #     )
+
+
 
     def _init_llama(self):
+        bnb_config = transformers.BitsAndBytesConfig(
+            load_in_8bit=True,
+            bnb_8bit_use_double_quant=True
+        )
         model = AutoModelForCausalLM.from_pretrained(
             self.base_model,
             torch_dtype=torch.float16,
-            load_in_8bit=self.load_8bit,
+            quantization_config= bnb_config,
+            #load_in_8bit=self.load_8bit,
             device_map={'':0},
             cache_dir=os.path.join(root, 'weights/llama')
         )
-        #model.gradient_checkpointing_enable()
-        # if not self.load_8bit:
-        #     model.half().to(self.device)
-        # else:
-        #     model = prepare_model_for_kbit_training(model) #, use_gradient_checkpointing=True
-
 
         return model
 
     def _init_actor(self, lora_weights = None):
+        bnb_config = transformers.BitsAndBytesConfig(
+            load_in_8bit=True,
+            bnb_8bit_use_double_quant=True
+        )
         if lora_weights is None:
             config = LoraConfig(
                 r=self.lora_r,
                 lora_alpha=self.lora_alpha,
                 target_modules=self.lora_target_modules,
                 lora_dropout=self.lora_dropout,
+                quantization_config= bnb_config,
                 bias="none",
                 task_type="CAUSAL_LM",
             )
             model = get_peft_model(self.llama, config)
             model.print_trainable_parameters()
 
-            # old_state_dict = model.state_dict
-            # model.state_dict = (
-            #     lambda self, *_, **__: get_peft_model_state_dict(
-            #         self, old_state_dict()
-            #     )
-            # ).__get__(model, type(model))
         else:
             model = PeftModel.from_pretrained(
                 self.llama,
                 lora_weights,
                 torch_dtype=torch.float16,
-                load_in_8bit=self.load_8bit,
+                #load_in_8bit=self.load_8bit,
+                quantization_config= bnb_config,
                 device_map={'':0}
             )
             for name, param in model.named_parameters():
                 if 'lora' in name:
                     param.requires_grad = True
             model.print_trainable_parameters()
-            #print("loadpeft_savedmodels")
-            
-        # if torch.__version__ >= "2" and sys.platform != "win32":
-        #     model = torch.compile(model)
+
             
         return model
 
@@ -194,8 +202,8 @@ class LLMAgent(nn.Module):
 
         os.makedirs(exp_path, exist_ok=True)
         # save lora
-        #logger.info(list(self.agent.actor.parameters()))
-        #logger.info(list(filter(lambda p: p.requires_grad, self.actor.parameters())))
+        #print(list(self.agent.actor.parameters()))
+        #print(list(filter(lambda p: p.requires_grad, self.actor.parameters())))
         self.actor.save_pretrained(exp_path)  # safe_serialization=False
         # save critic
         torch.save(self.critic.v_head_mlp3.state_dict(), os.path.join(exp_path, "critic.pth"))
@@ -216,6 +224,29 @@ class LLMAgent(nn.Module):
         with self.actor.disable_adapter():
             value = self.critic(input_ids, attention_mask=attention_mask)
         return value
+    
+
+    def get_gpu_mem_info(self, gpu_id=0):
+        import pynvml
+        pynvml.nvmlInit()
+        if gpu_id < 0 or gpu_id >= pynvml.nvmlDeviceGetCount():
+            print(r'gpu_id {} 对应的显卡不存在!'.format(gpu_id))
+            return 0, 0, 0
+
+        handler = pynvml.nvmlDeviceGetHandleByIndex(gpu_id)
+        meminfo = pynvml.nvmlDeviceGetMemoryInfo(handler)
+        total = round(meminfo.total / 1024 / 1024, 2)
+        used = round(meminfo.used / 1024 / 1024, 2)
+        free = round(meminfo.free / 1024 / 1024, 2)
+        return total, used, free
+
+
+    def get_cpu_mem_info(self):
+        mem_total = round(psutil.virtual_memory().total / 1024 / 1024, 2)
+        mem_free = round(psutil.virtual_memory().available / 1024 / 1024, 2)
+        mem_process_used = round(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024, 2)
+        return mem_total, mem_free, mem_process_used
+
 
     def get_action_and_value(self, obs, actions, action=None, is_warmup=False, return_value = True):
 
@@ -225,9 +256,12 @@ class LLMAgent(nn.Module):
 
         sequence = []
         for p, ac in zip(prompt, action_list):
-            sequence += [(p + " " + a).replace('\n',' ') for a in ac]
+            sequence += [(p + a).replace('\n','').replace(' - ',' ') for a in ac]
 
         inputs = self.tokenizer(sequence, return_tensors="pt", padding=True)
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        print(r'tokenizer：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
         input_ids = inputs["input_ids"].to(self.device)
         
         attention_mask = inputs["attention_mask"]
@@ -237,6 +271,10 @@ class LLMAgent(nn.Module):
         else:
             outputs = self.actor(input_ids, attention_mask=attention_mask)
 
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        print(r'outputs：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
+
         action_list = [item for sublist in action_list for item in sublist]
         self.action_list_ids = self.tokenizer(action_list, return_tensors="pt", padding=True)
 
@@ -244,16 +282,40 @@ class LLMAgent(nn.Module):
         sequence_length = torch.sum(attention_mask, dim = -1)
         action_index = [[end - start, end] for start, end in zip(self.action_list_length, sequence_length)]
 
-        # maybe no need to use it, directly use logits
-        logits = torch.log_softmax(outputs.logits, dim=-1)
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        print(r'action_index：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
 
-        logits = logits[:, :-1, :]
+
+        # maybe no need to use it, directly use logits
+        logits = torch.log_softmax(outputs.logits, dim=-1)[:, :-1, :]
+
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        print(r'logits ：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+        
+        del outputs
+        gc.collect()
+        torch.cuda.empty_cache()
+
+
         input_ids = input_ids[:, 1:]
         gen_logits = torch.gather(logits, 2, input_ids[:, :, None]).squeeze(-1)
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        print(r'gen_logits ：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
+        del logits
+        gc.collect()
+        torch.cuda.empty_cache()
 
         slices = [gen_logits[i, start-1:end-1] for i, (start, end) in enumerate(action_index)]
         
         action_logits = torch.stack([torch.sum(s) for s in slices])
+        del gen_logits, slices
+        gc.collect()
+        torch.cuda.empty_cache()
+
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        print(r'action_logits ：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
         if self.normalization_mode == 'token':
             action_logits = action_logits / self.action_list_length.to(self.device)
         elif self.normalization_mode == 'word':
@@ -262,21 +324,20 @@ class LLMAgent(nn.Module):
         elif self.normalization_mode == 'sum':
             action_logits = action_logits
 
-
         action_logits = action_logits.reshape(-1, action_num).float()
 
         probs = Categorical(logits=action_logits)
 
+        gpu_mem_total, gpu_mem_used, gpu_mem_free = self.get_gpu_mem_info(gpu_id=0)
+        print(r'probs ：总共 {} MB， 已经使用 {} MB， 剩余 {} MB'.format(gpu_mem_total, gpu_mem_used, gpu_mem_free))
+
         if action is None:
             action = probs.sample()
 
-        del outputs, logits, gen_logits
+        del action_logits
+        gc.collect()
         torch.cuda.empty_cache()
 
-        # from accelerate.utils import release_memory
-        # release_memory(self.actor)
-
-        
         if return_value:
             return action, probs.log_prob(action), probs.entropy(), self.get_value(prompt)
         else:

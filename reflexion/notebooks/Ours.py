@@ -8,17 +8,17 @@ import os
 import csv
 import json
 import os
+import argparse
 from time import time
 from datasets import load_dataset
 import random
 import os
 from torch.utils.tensorboard import SummaryWriter
 from transformers import  AutoTokenizer
-#from ppo_llm_pomdp_lowlevel_gen import Policy, logger
-from ppo_llm_pomdp import Policy, logger
-import os
+from ppo_llm_pomdp_highlevel_concat import Policy, logger
+import gc
 os.environ['TORCH_USE_CUDA_DSA']='1'
-
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 def get_max_obslen(ds):
     tokenizer = AutoTokenizer.from_pretrained('/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct') #Meta-Llama-3-8B-Instruct, Llama-2-13b-chat-hf
@@ -42,12 +42,17 @@ def get_achievement(pre_ach, ach):
 task = str(['place_plant', 'collect_wood', 'place_table','make_wood_sword', 'make_wood_pickaxe', 'eat_plant', 'collect_coal', 'collect_stone', 'place_stone','place_furnace', 'make_stone_sword', 'make_stone_pickaxe', 'collect_iron', 'make_iron_sword','make_iron_pickaxe', 'collect_diamond','collect_drink','collect_sapling','defeat_skeleton','defeat_zombie','eat_cow','wake_up'])
 #task = 'eat_cow'
 num_updates = 1000   ##??最大步数
-num_steps = 2
+num_steps = 300
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--curr_update', type=int, default=0)
+args = parser.parse_args()
+# args.curr_update = int(args.curr_update)
+
+
+policy = Policy(max_steps= num_steps, max_obs = 210, curr_ckpt = 'epoch_'+(4-len(str(args.curr_update-1)))*str(0)+str(args.curr_update-1))  
 # writer = SummaryWriter(f"../writer/")
-policy = Policy(max_steps= num_steps, max_obs = 220)  
-
-for update in range(1, num_updates+1): #num_updates + 1
+for update in range(args.curr_update, args.curr_update+1): 
     logger.info('===========Current train update: '+str(update))
     # no_seed = random.randint(1,len(task_list))
     # task =  task_list[0]   
@@ -63,11 +68,10 @@ for update in range(1, num_updates+1): #num_updates + 1
 
     frac = 1.0 - (update - 1.0) / num_updates
     global_step = (update-1) * num_steps
-    global_step, rewards, achievement= policy.trainer(task, global_step, frac, writer=None)
+    global_step, rewards, achievement = policy.trainer(task, global_step, frac, writer=None)
 
     if global_step // num_steps > 0 : 
-        policy.agent.save(global_step // num_steps, "../result/")
-
+        policy.agent.save(global_step // num_steps, "/scratch/nlp/lijiaqi/result/")
 
     if  pre_achievement != achievement:
         hits = get_achievement(pre_achievement, achievement)
